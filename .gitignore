@@ -1,0 +1,33 @@
+# ── خروجی‌های ساخت (در GitHub Releases قرار می‌گیرند) ──
+build/
+dist/
+release/
+PythonTerminal.zip
+PythonTerminal.spec
+
+# ── وابستگی‌های دانلودشده (با build_html.py --download برمی‌گردند) ──
+vendor/
+
+# ── اسکریپت‌های موقت دیباگ و عکس‌های تست ──
+# فقط در ریشه (با / ابتدایی) تا فایل‌های tests\_test_*.py حذف نشوند
+/_*.py
+/_*.txt
+_shots/
+
+# ── پایتون ──
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# ── داده‌های کاربر (روی هر دستگاه جداگانه ساخته می‌شود) ──
+.progress.json
+.run/
+
+# ── ویرایشگر / سیستم ──
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
+.DS_Store

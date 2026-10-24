@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ترمینال پایتون — آموزش مقدماتی</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%2314161c'/><text y='72' x='50' text-anchor='middle' font-size='62' fill='%23e0a458' font-family='monospace'>&gt;_</text></svg>">
+</head>
+<body>
+
+<div id="boot" class="boot">
+  <div class="boot__inner">
+    <pre class="boot__logo">   ┌──────────────────────────────┐
+   │   ترمینال پایتون  v1.0      │
+   └──────────────────────────────┘</pre>
+    <p class="boot__msg" id="bootMsg">در حال اتصال به سرور…</p>
+  </div>
+</div>
+
+<div class="app" id="app" hidden>
+
+  <!-- ─────────── نوار عنوان ─────────── -->
+  <header class="titlebar">
+    <div class="titlebar__brand">
+      <span class="titlebar__glyph" aria-hidden="true">&gt;_</span>
+      <span class="titlebar__name">ترمینال پایتون</span>
+    </div>
+
+    <div class="titlebar__search">
+      <span class="titlebar__searchicon" aria-hidden="true">⌕</span>
+      <input type="search" id="searchInput" placeholder="جست‌وجو در درس‌ها…  (Ctrl+K)" autocomplete="off" spellcheck="false">
+      <kbd>/</kbd>
+    </div>
+
+    <div class="titlebar__tools">
+      <button class="btn btn--ghost btn--menu" id="btnMenu" title="فهرست">☰</button>
+      <button class="btn btn--ghost" id="btnPalette" title="جست‌وجوی دستورها (Ctrl+K)">
+        <span aria-hidden="true">⌘</span> دستورها
+      </button>
+      <button class="btn btn--ghost" id="btnTheme" title="تغییر پوسته (Ctrl+Alt+T)">پوسته</button>
+      <button class="btn btn--ghost" id="btnFont" title="اندازه‌ی فونت (Ctrl+Alt+↑/↓)">A−</button>
+      <button class="btn btn--ghost" id="btnHelp" title="راهنمای میان‌برها (F1)">؟</button>
+      <button class="btn btn--ghost" id="btnPhone" title="باز کردن روی گوشی">📱 گوشی</button>
+    </div>
+  </header>
+
+  <!-- ─────────── بدنه ─────────── -->
+  <div class="workspace" id="workspace">
+
+    <!-- نوار کناری: فهرست دوره -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__scroll">
+
+        <section class="navgroup">
+          <h2 class="navgroup__title">
+            <span>درس‌ها</span>
+            <span class="navgroup__count" id="countLessons">0</span>
+          </h2>
+          <ul class="navlist" id="navLessons"></ul>
+        </section>
+
+        <section class="navgroup">
+          <h2 class="navgroup__title">
+            <span>تمرین‌ها</span>
+            <span class="navgroup__count" id="countExercises">0</span>
+          </h2>
+          <ul class="navlist" id="navExercises"></ul>
+        </section>
+
+        <section class="navgroup">
+          <h2 class="navgroup__title"><span>ابزارها</span></h2>
+          <ul class="navlist">
+            <li><button class="navitem navitem--action" id="navQuiz">
+              <span class="navitem__mark" aria-hidden="true">◈</span>
+              <span class="navitem__text">آزمون سریع</span>
+              <span class="navitem__badge" id="quizBadge"></span>
+            </button></li>
+            <li><button class="navitem navitem--action" id="navScratch">
+              <span class="navitem__mark" aria-hidden="true">✎</span>
+              <span class="navitem__text">یادداشت آزاد</span>
+            </button></li>
+            <li><button class="navitem navitem--action" id="navSearchAll">
+              <span class="navitem__mark" aria-hidden="true">⌕</span>
+              <span class="navitem__text">جست‌وجو در همه‌ی جزوه‌ها</span>
+            </button></li>
+          </ul>
+        </section>
+
+        <section class="navgroup">
+          <h2 class="navgroup__title">
+            <span>پروژه‌ها</span>
+            <span class="navgroup__count" id="countProjects">0</span>
+          </h2>
+          <ul class="navlist" id="navProjects"></ul>
+        </section>
+
+      </div>
+
+      <div class="sidebar__progress">
+        <div class="progressbar"><i id="progressFill" style="width:0%"></i></div>
+        <div class="sidebar__progresslabel">
+          <span id="progressLabel">۰ از ۰</span>
+          <span id="progressPct">۰٪</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ─────────── پنل چپ: کد ─────────── -->
+    <section class="pane pane--code" id="paneCode">
+
+      <div class="codepane__toolbar">
+        <div class="codepane__filetab">
+          <span class="codepane__dot" id="fileDot" aria-hidden="true"></span>
+          <span class="codepane__filename" id="fileName">—</span>
+          <span class="codepane__dirty" id="fileDirty" hidden title="تغییرات ذخیره نشده">●</span>
+        </div>
+
+        <div class="codepane__actions">
+          <button class="btn btn--run" id="btnRun" title="اجرا (Ctrl+Enter)">
+            <span aria-hidden="true">▶</span> اجرا
+          </button>
+          <button class="btn btn--check" id="btnCheck" title="بررسی با تست‌ها (Ctrl+Shift+Enter)">
+            <span aria-hidden="true">✓</span> بررسی
+          </button>
+          <span class="toolsep" aria-hidden="true"></span>
+          <button class="btn btn--ghost btn--icon" id="btnHint" title="راهنمای مرحله‌ای">؟</button>
+          <button class="btn btn--ghost btn--icon" id="btnSolution" title="نمایش راه‌حل">★</button>
+          <button class="btn btn--ghost btn--icon" id="btnCopy" title="کپی کد">⧉</button>
+          <button class="btn btn--ghost btn--icon" id="btnReset" title="بازنشانی کد">⟲</button>
+        </div>
+      </div>
+
+      <!-- ویرایشگر -->
+      <div class="editor" id="editorWrap">
+        <div class="editor__gutter" id="gutter" aria-hidden="true"></div>
+        <div class="editor__area">
+          <pre class="editor__highlight" id="highlight" aria-hidden="true"><code id="highlightCode"></code></pre>
+          <textarea class="editor__input" id="code" spellcheck="false" autocomplete="off"
+                    autocapitalize="off" wrap="off" aria-label="ویرایشگر کد پایتون"></textarea>
+        </div>
+      </div>
+
+      <!-- کنسول -->
+      <div class="vsplit" id="vsplit" role="separator" aria-label="جداکننده‌ی کنسول" tabindex="0"></div>
+
+      <div class="console" id="console">
+        <div class="console__head">
+          <div class="console__tabs" role="tablist">
+            <button class="console__tab is-active" data-tab="output" role="tab">خروجی</button>
+            <button class="console__tab" data-tab="problems" role="tab">ایرادها</button>
+            <button class="console__tab" data-tab="tests" role="tab">تست‌ها</button>
+          </div>
+          <button class="btn btn--ghost btn--tiny" id="btnClearConsole">پاک کردن</button>
+        </div>
+
+        <div class="console__body">
+          <div class="console__pane is-active" id="tabOutput">
+            <pre class="console__stdout" id="stdout">(هنوز چیزی اجرا نشده)</pre>
+          </div>
+
+          <div class="console__pane" id="tabProblems">
+            <div class="diag" id="diag">
+              <p class="diag__empty">خطایی گزارش نشده. کدت را اجرا کن تا اگر مشکلی بود،
+                دلیلش را فارسی برایت توضیح دهم.</p>
+            </div>
+          </div>
+
+          <div class="console__pane" id="tabTests">
+            <div class="tests" id="tests">
+              <p class="diag__empty">تستی اجرا نشده. دکمه‌ی «بررسی» را بزن.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────── جداکننده‌ی عمودی ─────────── -->
+    <div class="hsplit" id="hsplit" role="separator" aria-label="جداکننده‌ی ستون‌ها" tabindex="0"></div>
+
+    <!-- ─────────── پنل راست: جزوه ─────────── -->
+    <section class="pane pane--doc" id="paneDoc">
+      <div class="docpane__head">
+        <div class="docpane__meta">
+          <span class="docpane__kind" id="docKind">جزوه</span>
+          <h1 class="docpane__title" id="docTitle">—</h1>
+        </div>
+        <div class="docpane__actions">
+          <button class="btn btn--ghost btn--tiny" id="btnDocDone" title="علامت‌گذاری به‌عنوان خوانده‌شده">✓ خواندم</button>
+          <select class="select" id="docSelect" title="پرش به سند دیگر" aria-label="انتخاب سند"></select>
+        </div>
+      </div>
+
+      <div class="docpane__body" id="docBody">
+        <p class="diag__empty">یک درس یا تمرین را از نوار کناری انتخاب کن.</p>
+      </div>
+
+      <div class="docpane__toc" id="docToc" hidden></div>
+    </section>
+  </div>
+
+  <!-- ─────────── ناوبری موبایل ─────────── -->
+  <nav class="mobilenav" id="mobileNav" aria-label="ناوبری اصلی">
+    <button class="mobilenav__btn is-active" data-view="menu">
+      <span aria-hidden="true">☰</span> فهرست
+    </button>
+    <button class="mobilenav__btn" data-view="code">
+      <span aria-hidden="true">⌨</span> کد
+    </button>
+    <button class="mobilenav__btn" data-view="doc">
+      <span aria-hidden="true">📄</span> جزوه
+    </button>
+  </nav>
+
+  <!-- ─────────── نوار وضعیت ─────────── -->
+  <footer class="statusline" id="statusline">
+    <span class="statusline__mode" id="stMode">NORMAL</span>
+    <span class="statusline__sep">│</span>
+    <span id="stDoc">—</span>
+    <span class="statusline__sep">│</span>
+    <span id="stExercise">—</span>
+    <span class="statusline__sep">│</span>
+    <span id="stTests">—</span>
+    <span class="statusline__spacer"></span>
+    <span id="stTimer">00:00</span>
+    <span class="statusline__sep">│</span>
+    <span id="stPython">Python</span>
+    <span class="statusline__sep">│</span>
+    <span>UTF-8</span>
+  </footer>
+</div>
+
+<!-- ─────────── پالت دستورها ─────────── -->
+<div class="palette" id="palette" hidden>
+  <div class="palette__box">
+    <input type="text" id="paletteInput" placeholder="دستور را بنویس…" autocomplete="off" spellcheck="false">
+    <ul class="palette__list" id="paletteList"></ul>
+  </div>
+</div>
+
+<!-- ─────────── پنجره‌ی راهنما ─────────── -->
+<div class="modal" id="helpModal" hidden>
+  <div class="modal__box">
+    <div class="modal__head">
+      <h2>میان‌برها</h2>
+      <button class="btn btn--ghost btn--icon" id="btnHelpClose" aria-label="بستن">✕</button>
+    </div>
+    <div class="modal__body" id="helpBody"></div>
+  </div>
+</div>
+
+<!-- ─────────── پنجره‌ی «باز کردن روی گوشی» ─────────── -->
+<div class="modal" id="phoneModal" hidden>
+  <div class="modal__box">
+    <div class="modal__head">
+      <h2>باز کردن روی گوشی</h2>
+      <button class="btn btn--ghost btn--icon" id="btnPhoneClose" aria-label="بستن">✕</button>
+    </div>
+    <div class="modal__body" id="phoneBody"></div>
+  </div>
+</div>
+
+<!-- ─────────── راهنمای درون‌برنامه‌ای ─────────── -->
+<div class="toast" id="toast" hidden></div>
+
+<script>window.__BOOTSTRAP__ = /*__BOOTSTRAP__*/ null;</script>
+<script src="/static/md.js"></script>
+<script src="/static/highlight.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>
