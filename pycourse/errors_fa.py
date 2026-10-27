@@ -450,8 +450,15 @@ def _fallback(kind: str, message: str, line: int | None = None, source: str = ""
     )
 
 
-def diagnose(stderr: str) -> Diagnosis | None:
-    """traceback خام را به تشخیص فارسی تبدیل می‌کند."""
+def diagnose(stderr: str, lang: str = "fa") -> Diagnosis | None:
+    """traceback خام را به تشخیص فارسی تبدیل می‌کند.
+
+    `lang` — "fa" (Persian, default) or "en" (English).
+    """
+    if lang == "en":
+        from . import errors_en
+        return errors_en.diagnose(stderr)
+
     kind, message, line, source = parse_traceback(stderr)
     if not kind:
         return None

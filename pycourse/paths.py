@@ -1,9 +1,9 @@
 """
-مسیرهای برنامه.
+Application paths.
 
-وقتی برنامه با PyInstaller بسته‌بندی می‌شود، داده‌ها داخل پوشه‌ی موقت
-`_MEIPASS` باز می‌شوند (فقط‌خواندنی) و فایل‌های قابل‌نوشتن باید کنار
-خودِ exe بنشینند. این ماژول هر دو حالت را یکدست می‌کند.
+When the program is bundled with PyInstaller, data is loaded from the
+temp folder `_MEIPASS` (read-only) and writable files should be placed
+next to the exe. This module handles both cases consistently.
 """
 
 from __future__ import annotations
@@ -14,9 +14,24 @@ from pathlib import Path
 
 FROZEN = bool(getattr(sys, "frozen", False))
 
+# Application language: "fa" (Persian/RTL) or "en" (English/LTR)
+# Override at runtime with: pycourse.paths.set_language("en")
+LANGUAGE: str = "fa"
+
+
+def set_language(lang: str) -> None:
+    """Change the application language ('fa' or 'en')."""
+    global LANGUAGE
+    if lang in ("fa", "en"):
+        LANGUAGE = lang
+
+
+def get_language() -> str:
+    return LANGUAGE
+
 
 def app_root() -> Path:
-    """پوشه‌ی داده‌های فقط‌خواندنی (درس‌ها، تمرین‌ها، رابط کاربری)."""
+    """Return the application root directory."""
     if FROZEN:
         meipass = getattr(sys, "_MEIPASS", None)
         if meipass:
@@ -26,14 +41,14 @@ def app_root() -> Path:
 
 
 def user_dir() -> Path:
-    """پوشه‌ی قابل‌نوشتن (پیشرفت، تنظیمات)."""
+    """Return the user directory."""
     if FROZEN:
         return Path(sys.executable).resolve().parent
     return Path(__file__).resolve().parent.parent
 
 
 def run_dir() -> Path:
-    """پوشه‌ی موقت اجرای کد کاربر."""
+    """Return the temporary run directory."""
     if FROZEN:
         return Path(tempfile.gettempdir()) / "python-terminal-runs"
     return app_root() / ".run"

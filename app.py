@@ -37,7 +37,9 @@ for _stream in (sys.stdout, sys.stderr):
 from pycourse import (  # noqa: E402
     content,
     errors_fa,
+    errors_en,
     hints as hints_mod,
+    hints_en,
     paths,
     progress,
     runner,
@@ -52,6 +54,27 @@ PORT = int(os.environ.get("PYCOURSE_PORT", "8765"))
 
 # شمارنده‌ی تلاش‌ها برای اینکه راه‌حل زودتر از حد لازم لو نرود
 MIN_ATTEMPTS_FOR_SOLUTION = 3
+
+
+def _lang(query: dict | None = None) -> str:
+    """Return the current UI language ('fa' or 'en')."""
+    if query and query.get("lang"):
+        lang = query["lang"][0]
+        if lang in ("fa", "en"):
+            paths.set_language(lang)
+    return paths.get_language()
+
+
+def _diagnose(stderr: str) -> object | None:
+    """Diagnose in the current UI language."""
+    return errors_fa.diagnose(stderr, lang=paths.get_language())
+
+
+def _hints(exercise_id: str) -> list[str]:
+    """Return the hint pool for an exercise in the current UI language."""
+    if paths.get_language() == "en":
+        return hints_en.HINTS.get(exercise_id, hints_en.GENERAL_HINTS)
+    return hints_mod.HINTS.get(exercise_id, hints_mod.GENERAL_HINTS)
 
 
 def _restore_streams() -> None:
@@ -194,6 +217,16 @@ def api_network(_query: dict) -> dict:
     }
 
 
+def api_set_language(body: dict) -> dict:
+    """Set the UI language for this server session."""
+    lang = (body.get("lang") or "").strip()
+    if lang not in ("fa", "en"):
+        return {"lang": paths.get_language(), "error": "Invalid language"}
+    paths.set_language(lang)
+    progress.update(lang=lang)
+    return {"lang": lang, "ok": True}
+
+
 def api_curriculum(_query: dict) -> dict:
     return {
         "lessons": content.list_lessons(),
@@ -208,7 +241,8 @@ def api_doc(query: dict) -> dict:
     doc_id = (query.get("id") or [""])[0]
     doc = content.read_any(doc_id)
     if doc is None:
-        return {"error": "سند پیدا نشد"}
+        lang = _lang(query)
+        return {"error": "Document not found" if lang == "en" else "سند پیدا نشد"}
     return doc
 
 
@@ -216,8 +250,9 @@ def api_exercise(query: dict) -> dict:
     exercise_id = (query.get("id") or [""])[0]
     exercise = content.read_exercise(exercise_id)
     if exercise is None:
-        return {"error": "تمرین پیدا نشد"}
-    exercise["hints"] = hints_mod.HINTS.get(exercise_id, hints_mod.GENERAL_HINTS)
+        lang = _lang(query)
+        return {"error": "Exercise not found" if lang == "en" else "تمرین پیدا نشد"}
+    exercise["hints"] = _hints(exercise_id)
     exercise["attempts"] = int(progress.get_state().get("attempts", {}).get(exercise_id, 0))
     return exercise
 
@@ -225,7 +260,8 @@ def api_exercise(query: dict) -> dict:
 def api_hint(query: dict) -> dict:
     exercise_id = (query.get("exercise") or [""])[0]
     level = int((query.get("level") or ["1"])[0])
-    pool = hints_mod.HINTS.get(exercise_id, hints_mod.GENERAL_HINTS)
+    lang = _lang(query)
+    pool = _hints(exercise_id)
     level = max(1, min(level, len(pool)))
     return {
         "level": level,
@@ -237,7 +273,18 @@ def api_hint(query: dict) -> dict:
 def api_solution(query: dict) -> dict:
     exercise_id = (query.get("id") or [""])[0]
     attempts = int(progress.get_state().get("attempts", {}).get(exercise_id, 0))
+    lang = _lang(query)
     if attempts < MIN_ATTEMPTS_FOR_SOLUTION:
+        if lang == "en":
+            return {
+                "locked": True,
+                "attempts": attempts,
+                "needed": MIN_ATTEMPTS_FOR_SOLUTION,
+                "message": (
+                    f"To unlock the solution, you need at least {MIN_ATTEMPTS_FOR_SOLUTION} attempts. "
+                    f"You've made {attempts} — read the hints first."
+                ),
+            }
         return {
             "locked": True,
             "attempts": attempts,
@@ -249,7 +296,8 @@ def api_solution(query: dict) -> dict:
         }
     solution = content.read_solution(exercise_id)
     if solution is None:
-        return {"error": "برای این تمرین راه‌حل آماده نشده"}
+        no_sol = ("No solution is available for this exercise." if lang == "en" else "برای این تمرین راه‌حل آماده نشده")
+        return {"error": no_sol}
     return {"locked": False, **solution}
 
 
@@ -345,7 +393,7 @@ def api_run(body: dict) -> dict:
 
     diagnosis = None
     if result["stderr"].strip():
-        diagnosis = errors_fa.diagnose(result["stderr"])
+        diagnosis = _diagnose(result["stderr"])
         # اگر خطا از تست‌های خودمان آمده، پیام فارسی تست را نشان بده
         if diagnosis and diagnosis.kind == "AssertionError":
             diagnosis = errors_fa.diagnose_assertion(
@@ -423,6 +471,7 @@ class Handler(BaseHTTPRequestHandler):
         payload = {
             "curriculum": api_curriculum({}),
             "progress": progress.get_state(),
+            "lang": paths.get_language(),
         }
         blob = json.dumps(payload, ensure_ascii=False)
         # کل عبارت «/*__BOOTSTRAP__*/ null» جایگزین می‌شود، نه فقط کامنت
@@ -453,6 +502,8 @@ class Handler(BaseHTTPRequestHandler):
         query = parse_qs(parsed.query)
 
         try:
+            # Set language from query param if present (lang=fa or lang=en)
+            _lang(query)
             if path in ("/", "/index.html"):
                 self._send_index()
                 return
@@ -471,6 +522,9 @@ class Handler(BaseHTTPRequestHandler):
                 return
             if path == "/api/network":
                 self._send_json(api_network(query))
+                return
+            if path == "/api/set-language":
+                self._send_json(api_set_language(body))
                 return
             if path == "/api/doc":
                 self._send_json(api_doc(query))
@@ -519,6 +573,9 @@ class Handler(BaseHTTPRequestHandler):
                 return
             if path == "/api/quiz":
                 self._send_json(api_quiz(body))
+                return
+            if path == "/api/set-language":
+                self._send_json(api_set_language(body))
                 return
             self._send(404, b"not found", "text/plain; charset=utf-8")
         except Exception:  # noqa: BLE001

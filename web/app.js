@@ -24,6 +24,7 @@
     paletteIndex: 0,
     paletteItems: [],
     lastResult: null,
+    lang: "fa",  /* current UI language: "fa" or "en" */
   };
 
   /* ── میان‌برها ── */
@@ -58,6 +59,9 @@
   /* ── ابزارها ── */
   function faNumber(n) {
     var digits = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
+    if (state.lang === "en") {
+      return String(n);
+    }
     return String(n).replace(/\d/g, function (d) { return digits[Number(d)]; });
   }
 
@@ -126,6 +130,7 @@
       // داده‌ها از قبل داخل صفحه هستند — بدون تأخیر رندر می‌کنیم
       state.curriculum = injected.curriculum;
       state.progress = injected.progress || state.progress;
+      if (injected.lang) state.lang = injected.lang;
       startApp();
       return;
     }
@@ -1012,6 +1017,30 @@
     toast(next === "crt" ? "پوسته‌ی سبز CRT" : "پوسته‌ی کهربایی");
   }
 
+  function toggleLanguage() {
+    var nextLang = state.lang === "fa" ? "en" : "fa";
+    post("/api/set-language", { lang: nextLang })
+      .then(function (data) {
+        if (data.ok) {
+          state.lang = nextLang;
+          document.documentElement.setAttribute("lang", nextLang);
+          document.documentElement.setAttribute("dir", nextLang === "fa" ? "rtl" : "ltr");
+          // Refresh UI to reflect language change
+          renderSidebar();
+          renderDocSelect();
+          if (state.docId) {
+            if (state.docKind === "lesson") openLesson(state.docId);
+            else if (state.docKind === "exercise") loadExercise(state.docId, false);
+            else if (state.docKind === "project") openProject(state.docId);
+          }
+          toast(nextLang === "en" ? "Language switched to English" : "زبان به فارسی تغییر کرد");
+        }
+      })
+      .catch(function (err) {
+        toast("Language switch failed: " + err.message, "error");
+      });
+  }
+
   function changeFont(delta) {
     var current = parseFloat(
       getComputedStyle(document.documentElement).getPropertyValue("--fs-code")
@@ -1244,6 +1273,9 @@
     $("phoneModal").addEventListener("click", function (e) {
       if (e.target === $("phoneModal")) $("phoneModal").hidden = true;
     });
+
+    // زبان
+    $("btnLang").onclick = toggleLanguage;
 
     // پوسته و فونت
     dom.btnTheme.onclick = toggleTheme;
