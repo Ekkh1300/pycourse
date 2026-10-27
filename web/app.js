@@ -66,11 +66,17 @@
   }
 
   function toast(message, kind) {
+    // پیام «در حال بارگذاری موتور» نباید با یک toast موقتی گم شود
+    if (dom.toast.dataset.locked === "1") return;
     dom.toast.textContent = message;
     dom.toast.className = "toast" + (kind ? " is-" + kind : "");
     dom.toast.hidden = false;
     clearTimeout(toast._t);
-    toast._t = setTimeout(function () { dom.toast.hidden = true; }, 3600);
+    toast._t = setTimeout(function () {
+      // اگر در حین بارگذاری موتوریم، این تایمر نباید پیام ماندگار را پنهان کند
+      if (dom.toast.dataset.locked === "1") return;
+      dom.toast.hidden = true;
+    }, 3600);
   }
 
   function api(path, options) {
@@ -488,6 +494,19 @@
      ══════════════════════════════════════════════════════════ */
 
   function runCode(mode) {
+    /* روی گوشی بارگذاری موتور ۸ تا ۱۵ ثانیه طول می‌کشد. قبلاً دکمه در این
+       بازه `pointer-events: none` بود و کلیک کاربر بی‌صدا بلعیده می‌شد؛
+       حالا پاسخ فوری می‌دهیم که واقعاً در حال کاریم. */
+    if (dom.btnRun.classList.contains("is-busy")) {
+      if (dom.toast.dataset.locked === "1") {
+        // در حین بارگذاری موتوریم: پیام ماندگار را دوباره نمایان کن
+        dom.toast.hidden = false;
+      } else {
+        toast("در حال اجرا… چند لحظه صبر کن", "info");
+      }
+      return;
+    }
+
     var code = dom.code.value;
     saveCode(state.exerciseId || "scratch", code);
 
@@ -495,16 +514,44 @@
     dom.btnCheck.classList.add("is-busy");
     setConsoleTab("output");
 
-    post("/api/run", {
-      code: code,
-      mode: mode,
-      exercise_id: state.exerciseId || "",
-      timeout: 10,
-    })
+    /* اگر `post` خطا بدهد (مثلاً TypeError هنگام بارگذاری موتور)، آن خطا
+       «همزمان» است و از زنجیره‌ی .then/.catch رد می‌شود — در نتیجه
+       `classList.remove("is-busy")` اجرا نمی‌شد و دکمه‌ها با
+       `pointer-events: none` برای همیشه می‌مُردند. اینجا تبدیلش می‌کنیم
+       به وعده‌ی ردشده تا .catch همیشه اجرا شود. */
+    var request;
+    try {
+      request = post("/api/run", {
+        code: code,
+        mode: mode,
+        exercise_id: state.exerciseId || "",
+        timeout: 10,
+      });
+    } catch (err) {
+      request = Promise.reject(err);
+    }
+
+    request
       .then(function (result) {
         state.lastResult = result;
         dom.btnRun.classList.remove("is-busy");
         dom.btnCheck.classList.remove("is-busy");
+
+        if (result && result.engine_failed) {
+          // موتور پایتون بالا نیامد — دکمه‌ها آزاد شدند و می‌توان دوباره تلاش کرد
+          dom.stdout.textContent =
+            "❗ " + (result.stderr || "بارگذاری موتور پایتون ناموفق بود.");
+          dom.diag.innerHTML =
+            '<p class="diag__empty">موتور پایتون بارگذاری نشد. ' +
+            "دکمه‌ی «اجرا» را دوباره بزن تا از نو تلاش شود؛ معمولاً به خاطر " +
+            "کمبود حافظه یا کندی گوشی پیش می‌آید.</p>";
+          state.errorLine = null;
+          dom.stMode.textContent = "IDLE";
+          dom.stMode.className = "statusline__mode";
+          refreshEditor();
+          toast("بارگذاری موتور ناموفق بود — دوباره تلاش کن", "error");
+          return;
+        }
 
         dom.stdout.textContent = result.stdout || "";
         if (!result.stdout) {
@@ -525,7 +572,7 @@
       .catch(function (err) {
         dom.btnRun.classList.remove("is-busy");
         dom.btnCheck.classList.remove("is-busy");
-        toast("اجرا نشد: " + err.message, "error");
+        toast("اجرا نشد: " + (err && err.message ? err.message : err), "error");
       });
   }
 

@@ -12,7 +12,17 @@
   var COURSE = window.__COURSE__ || {};
   var PROGRESS_KEY = "pycourse.progress.static";
   var pyodide = null;
-  var loading = false;
+  /* وعده‌ی در جریانِ بارگذاری.
+
+     قبلاً `loading` یک بولین بود و در صورت شکست هیچ‌وقت ریست نمی‌شد؛ بعد
+     هر فراخوانی بعدی `window.__PYODIDE_READY__` را برمی‌گرداند که چون تابع
+     بارگذار داخل IIFE بود همیشه `null` بود → `.then` روی null → TypeError
+     همزمان → `.catch` هیچ‌وقت وصل نمی‌شد → دکمه‌ها برای همیشه `is-busy`
+     می‌ماندند و `pointer-events: none` آن‌ها را از کار می‌انداخت. */
+  var pendingPyodide = null;
+  /* صف اجرا: دو اجرای همزمان `setStdout` را از هم می‌دزدند چون روی خودِ
+     نمونه‌ی Pyodide سراسری است و خروجی‌ها قاطی می‌شود. */
+  var runQueue = Promise.resolve();
 
   // ── پیشرفت ──
   function loadProgress() {
@@ -48,37 +58,84 @@
   // ── Pyodide ──
   function ensurePyodide() {
     if (pyodide) return Promise.resolve(pyodide);
-    if (loading) return window.__PYODIDE_READY__;
-    loading = true;
+    // هیچ‌وقت null برنمی‌گردانیم؛ همیشه یک وعده‌ی معتبر برمی‌گردد
+    if (pendingPyodide) return pendingPyodide;
+
     var toast = document.getElementById("toast");
     if (toast) {
+      toast.dataset.locked = "1";
       toast.textContent = "در حال بارگذاری موتور پایتون (اولین بار کمی طول می‌کشد)…";
       toast.hidden = false;
     }
-    return window.loadPyodide().then(function (instance) {
-      pyodide = instance;
-      loading = false;
-      if (toast) toast.hidden = true;
-      return instance;
-    });
+
+    pendingPyodide = Promise.resolve()
+      .then(function () {
+        return window.loadPyodide();
+      })
+      .then(function (instance) {
+        pyodide = instance;
+        pendingPyodide = null;
+        if (toast) {
+          toast.dataset.locked = "";
+          toast.hidden = true;
+        }
+        return instance;
+      })
+      .catch(function (err) {
+        // ریست، تا کاربر بتواند دوباره تلاش کند — نه دکمه‌ی مرده
+        pendingPyodide = null;
+        if (toast) {
+          toast.dataset.locked = "";
+          toast.textContent =
+            "موتور پایتون بارگذاری نشد. دکمه را دوباره بزن تا از نو تلاش شود. (" +
+            String((err && err.message) || err).slice(0, 120) +
+            ")";
+          toast.hidden = false;
+        }
+        throw err;
+      });
+
+    return pendingPyodide;
   }
 
   function runPython(source) {
-    return ensurePyodide().then(function (py) {
-      var out = "";
-      var err = "";
-      py.setStdout({ batched: function (text) { out += text + "\n"; } });
-      py.setStderr({ batched: function (text) { err += text + "\n"; } });
-      return py
-        .runPythonAsync(source)
-        .then(function () {
-          return { stdout: out, stderr: err, failed: false };
-        })
-        .catch(function (e) {
-          err += String(e && e.message ? e.message : e);
-          return { stdout: out, stderr: err, failed: true };
-        });
-    });
+    // اجراها را صف می‌کنیم تا setStdout هم‌زمان عوض نشود
+    var task = runQueue
+      .then(function () {
+        return ensurePyodide();
+      })
+      .then(function (py) {
+        var out = "";
+        var err = "";
+        py.setStdout({ batched: function (text) { out += text + "\n"; } });
+        py.setStderr({ batched: function (text) { err += text + "\n"; } });
+        return py
+          .runPythonAsync(source)
+          .then(function () {
+            return { stdout: out, stderr: err, failed: false };
+          })
+          .catch(function (e) {
+            err += String(e && e.message ? e.message : e);
+            return { stdout: out, stderr: err, failed: true };
+          });
+      })
+      .catch(function (e) {
+        // بارگذاری ناموفق بود: خطا را به شکل نتیجه برمی‌گردانیم
+        // (engine_failed تا تشخیص خطا دوباره موتور را بار نگذارد)
+        return {
+          stdout: "",
+          stderr: String((e && e.message) || e),
+          failed: true,
+          engine_failed: true,
+        };
+      });
+
+    // صف بدون توجه به نتیجه، فقط بعد از اتمام این کار جلو می‌رود
+    runQueue = task.then(
+      function () {},
+      function () {}
+    );
+    return task;
   }
 
   // ── تشخیص خطا به فارسی (همان کد سرور، اجرا در Pyodide) ──
@@ -150,7 +207,10 @@
         }
       }
 
-      var diagPromise = diagnose(result.stderr);
+      // شکست موتور: تشخیص خطا خودش به Pyodide نیاز دارد، پس دوباره بارش نکن
+      var diagPromise = result.engine_failed
+        ? Promise.resolve(null)
+        : diagnose(result.stderr);
 
       return diagPromise.then(function (diag) {
         var payload = {
@@ -163,6 +223,7 @@
           timed_out: false,
           mode: mode,
           tests: tests,
+          engine_failed: !!result.engine_failed,
         };
         if (mode === "check" && body.exercise_id) {
           payload.attempts = bumpAttempt(body.exercise_id);

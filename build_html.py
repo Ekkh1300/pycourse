@@ -199,11 +199,26 @@ def assemble(course: dict, *, offline: bool) -> str:
     "use strict";
 
     function b64ToBytes(id) {{
-      var bin = atob(document.getElementById(id).textContent.trim());
-      var len = bin.length;
-      var bytes = new Uint8Array(len);
-      for (var i = 0; i < len; i++) bytes[i] = bin.charCodeAt(i);
-      return bytes;
+      var el = document.getElementById(id);
+      // trim نمی‌کنیم: atob خودش فاصله‌ها را نادیده می‌گیرد و .trim()
+      // یک کپی ۲۷ مگابایتی از رشته می‌ساخت (فشار حافظه روی گوشی).
+      var b64 = el.textContent;
+      // base64 فقط یک‌بار خوانده می‌شود؛ متنش را از DOM آزاد می‌کنیم.
+      el.textContent = "";
+
+      // تکه‌تکه رمزگشایی می‌کنیم تا به‌جای یک رشته‌ی ۲۷ مگابایتیِ میانی،
+      // فقط یک تکه‌ی ۳ مگابایتی در حافظه باشد. اندازه باید مضرب ۴ باشد
+      // تا مرز تکه‌ها با گروه‌های base64 هم‌خوان بماند.
+      var CHUNK = 3 * 1024 * 1024;
+      var bytes = new Uint8Array(Math.floor(b64.length * 3 / 4));
+      var off = 0;
+      for (var i = 0; i < b64.length; i += CHUNK) {{
+        var bin = atob(b64.slice(i, i + CHUNK));
+        var bl = bin.length;
+        for (var j = 0; j < bl; j++) bytes[off + j] = bin.charCodeAt(j);
+        off += bl;
+      }}
+      return off === bytes.length ? bytes : bytes.subarray(0, off);
     }}
 
     var WASM = null;
@@ -253,14 +268,19 @@ def assemble(course: dict, *, offline: bool) -> str:
       return realFetch(input, init);
     }};
 
-    window.__PYODIDE_READY__ = null;
-    function loadPyodide() {{
-      if (window.__PYODIDE_READY__) return window.__PYODIDE_READY__;
-      window.__PYODIDE_READY__ = Promise.resolve(
-        globalThis.loadPyodide({{ indexURL: window.__PYODIDE_INDEX__ }})
-      );
-      return window.__PYODIDE_READY__;
-    }}
+    /* بارگذار باید «سراسری» باشد. قبلاً داخل IIFE تعریف شده بود و هرگز به
+       window نمی‌رسید؛ در نتیجه static-api مستقیم بارگذار اصلی Pyodide را
+       بدون indexURL صدا می‌زد. حالا خودمان آن را با indexURL درست سراسری
+       می‌کنیم. */
+    var nativeLoadPyodide = globalThis.loadPyodide;
+    window.loadPyodide = function (options) {{
+      options = options || {{}};
+      if (!options.indexURL) options.indexURL = window.__PYODIDE_INDEX__;
+      if (typeof nativeLoadPyodide !== "function") {{
+        return Promise.reject(new Error("بارگذار Pyodide در فایل نیست"));
+      }}
+      return nativeLoadPyodide(options);
+    }};
   }})();
 </script>
 """
@@ -280,10 +300,15 @@ def assemble(course: dict, *, offline: bool) -> str:
         (async function () {{
           try {{
             resolve(await globalThis.loadPyodide({{ indexURL: window.PYODIDE_CDN }}));
-          }} catch (e) {{ reject(e); }}
+          }} catch (e) {{
+            // وعده‌ی ردشده نباید کَش شود، وگرنه تلاش مجدد برای همیشه شکست می‌خورد
+            window.__PYODIDE_READY__ = null;
+            reject(e);
+          }}
         }})();
       }};
       script.onerror = function () {{
+        window.__PYODIDE_READY__ = null;
         reject(new Error("بارگذاری Pyodide از اینترنت ممکن نشد"));
       }};
       document.head.appendChild(script);

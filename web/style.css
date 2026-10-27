@@ -262,7 +262,9 @@ button, input, select, textarea { font-family: inherit; font-size: inherit; colo
 }
 .btn--check:hover { border-color: var(--accent-2); color: var(--accent-2); }
 
-.btn.is-busy { opacity: .55; pointer-events: none; }
+/* pointer-events: none ندارد — قبلاً کلیک کاربر را در حین بارگذاریِ ۸ تا
+   ۱۵ ثانیه‌ای موتور روی گوشی کاملاً می‌بلعید و هیچ بازخوردی نمی‌داد. */
+.btn.is-busy { opacity: .55; cursor: progress; }
 
 .select {
   font-family: var(--font-mono);
