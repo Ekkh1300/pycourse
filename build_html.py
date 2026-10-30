@@ -91,7 +91,10 @@ def build_course_data(lang: str = "en") -> dict:
         )
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
-        for item in getattr(module, "QUESTIONS", []):
+        # بانک سؤالات متناسب با زبان خروجی (فارسی یا انگلیسی)
+        bank_name = "QUESTIONS_FA" if lang == "fa" else "QUESTIONS"
+        bank = getattr(module, bank_name, None) or getattr(module, "QUESTIONS", [])
+        for item in bank:
             quiz_questions.append({"q": item["q"], "options": item["options"]})
             answers.append(item["answer"])
             quiz_whys.append(item["why"])

@@ -123,20 +123,22 @@ def _run_script_mode() -> int:
 # ─────────────────────────────────────────────────────────────
 
 
-def _load_quiz_questions() -> list[dict]:
+def _load_quiz_questions() -> tuple[list[dict], list[dict]]:
     path = ROOT / "practice" / "quiz.py"
     if not path.exists():
-        return []
+        return [], []
     try:
         spec = importlib.util.spec_from_file_location("_quiz_bank", path)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
-        return list(getattr(module, "QUESTIONS", []))
+        en = list(getattr(module, "QUESTIONS", []))
+        fa = list(getattr(module, "QUESTIONS_FA", [])) or en
+        return en, fa
     except Exception:  # noqa: BLE001
-        return []
+        return [], []
 
 
-QUESTIONS = _load_quiz_questions()
+QUESTIONS, QUESTIONS_FA = _load_quiz_questions()
 
 
 # ─────────────────────────────────────────────────────────────
@@ -317,9 +319,11 @@ def api_progress_post(body: dict) -> dict:
 
 def api_quiz(body: dict) -> dict:
     answers = body.get("answers") or []
+    lang = body.get("lang") if body.get("lang") in ("en", "fa") else paths.get_language()
+    bank = QUESTIONS_FA if lang == "fa" else QUESTIONS
     results = []
     score = 0
-    for index, question in enumerate(QUESTIONS):
+    for index, question in enumerate(bank):
         chosen = answers[index] if index < len(answers) else None
         correct = chosen == question["answer"]
         if correct:
@@ -335,7 +339,7 @@ def api_quiz(body: dict) -> dict:
                 "options": question["options"],
             }
         )
-    total = len(QUESTIONS)
+    total = len(bank)
     percent = round(score / total * 100) if total else 0
     state = progress.get_state()
     best = state.get("quiz_best")
@@ -349,14 +353,15 @@ def api_quiz(body: dict) -> dict:
     }
 
 
-def api_quiz_questions(_query: dict) -> dict:
+def api_quiz_questions(query: dict) -> dict:
     """بانک سؤالات آزمون (بدون پاسخ‌ها) برای نمایش در مرورگر."""
+    bank = QUESTIONS_FA if _lang(query) == "fa" else QUESTIONS
     safe = [
         {
             "q": item.get("q", ""),
             "options": item.get("options", []),
         }
-        for item in QUESTIONS
+        for item in bank
     ]
     return {"questions": safe, "total": len(safe)}
 

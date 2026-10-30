@@ -30,6 +30,37 @@
   /* ── میان‌برها ── */
   var $ = function (id) { return document.getElementById(id); };
 
+  var TEXT = {
+    sidebarLessons: "Lessons", sidebarExercises: "Exercises", sidebarProjects: "Projects",
+    docLesson: "Lesson", docExercise: "Exercise", docProject: "Project", docQuiz: "Quick Quiz", docScratch: "Free Note", docSearch: "Search", docDone: "Done",
+    exerciseHints: "Hints", exerciseFullSolution: "Full solution", exerciseDone: "Done", exerciseUndone: "Undone", exerciseReset: "Code reset.", exerciseCopied: "Code copied.", exerciseSelectFirst: "Open an exercise first.", exerciseLocked: "Solution locked", exerciseUnlockMsg: "To unlock solution, need {MIN} attempts. You have {N} — read hints first.",
+    progressLessons: "Lessons", progressExercises: "Exercises", progressDone: "Done", progressRead: "Read", progressOf: "of", progressPercent: "%",
+    quizTitle: "Quick Quiz", quizQuestions: "13 questions", quizSubmit: "Submit answers", quizQuestionPrefix: "Question", quizOptions: ["A", "B", "C", "D"], quizCorrect: "Correct answer:", quizWhy: "Why?", quizScore: "Score", quizTotal: "of", quizPercent: "%",
+    diagKind: "Error", diagTitle: "Diagnosis", diagWhat: "What happened?", diagWhy: "Why?", diagHowto: "How to fix it?", notConnected: "Could not connect to the server: ",
+    searchTitle: "Search", searchPlaceholder: "Search all documents…", noSearchResults: "No results found for",
+    paletteLessons: "Lesson", paletteExercise: "Exercise", paletteDisplay: "Display", cleanClear: "Clear console",
+    navLessons: "Lessons", navExercises: "Exercises", navProjects: "Projects", navQuiz: "Quiz", navScratch: "Notes", navSearch: "Search all documents", navHelp: "Help",
+    themeCRT: "CRT green theme", themeAmber: "Amber theme", fontInc: "Font size: {N} px", langSwitchEn: "Language switched to English", langSwitchFa: "Language switched to Persian", loading: "Loading…", noContent: "No content available", resetConfirm: "Reset code? Your changes will be lost.", exerciseDescPrefix: "Exercise {num}:", briefSectionHints: "Hints", briefSectionSolution: "Solution", quizResult: "Quiz result", quizPerfect: "Perfect score!", quizTryAgain: "Try again", quizScoreLabel: "Your score", quizResults: "Results", hintLabel: "Hint", solutionLabel: "Solution", docSearch: "Search", noDoc: "No document selected", language: "Language"
+  };
+  var faTexts = {
+    sidebarLessons: "درس‌ها", sidebarExercises: "تمرین‌ها", sidebarProjects: "پروژه‌ها",
+    docLesson: "درس", docExercise: "تمرین", docProject: "پروژه", docQuiz: "آزمون سریع", docScratch: "یادداشت آزاد", docSearch: "جست‌وجو", docDone: "خواندم",
+    exerciseHints: "راهنماها", exerciseFullSolution: "راه‌حل کامل", exerciseDone: "انجام‌شده", exerciseUndone: "انجام‌نشده", exerciseReset: "کد بازنشانی شد.", exerciseCopied: "کد کپی شد.", exerciseSelectFirst: "ابتدا یک تمرین باز کن.", exerciseLocked: "راه‌حل قفل است", exerciseUnlockMsg: "برای دیدن راه‌حل باید {MIN} بار تلاش کنی. تو {N} بار تلاش کرده‌ای — اول راهنماها را بخوان.",
+    progressLessons: "درس‌ها", progressExercises: "تمرین‌ها", progressDone: "تمام", progressRead: "خوانده‌شده", progressOf: "از", progressPercent: "٪",
+    quizTitle: "آزمون سریع", quizQuestions: "۱۳ سؤال", quizSubmit: "ثبت پاسخ‌ها", quizQuestionPrefix: "سؤال", quizOptions: ["الف", "ب", "ج", "د"], quizCorrect: "پاسخ درست:", quizWhy: "چرا؟", quizScore: "نمره", quizTotal: "از", quizPercent: "٪",
+    diagKind: "خطا", diagTitle: "تشخیص", diagWhat: "چه شد؟", diagWhy: "چرا؟", diagHowto: "چطور درستش کنم؟", notConnected: "اتصال به سرور برقرار نشد: ",
+    searchTitle: "جست‌وجو", searchPlaceholder: "جست‌وجو در همه‌ی جزوه‌ها…", noSearchResults: "نتیجه‌ای برای", paletteLessons: "درس", paletteExercise: "تمرین", paletteDisplay: "نمایش", cleanClear: "پاک کردن کنسول",
+    navLessons: "درس‌ها", navExercises: "تمرین‌ها", navProjects: "پروژه‌ها", navQuiz: "آزمون", navScratch: "یادداشت", navSearch: "جست‌وجو در همه‌ی جزوه‌ها", navHelp: "راهنما", themeCRT: "پوسته‌ی سبز CRT", themeAmber: "پوسته‌ی کهربایی", fontInc: "اندازه‌ی فونت: {N} پیکسل", langSwitchEn: "زبان به انگلیسی تغییر کرد", langSwitchFa: "زبان به فارسی تغییر کرد", loading: "در حال بارگذاری…", noContent: "محتوایی در دسترس نیست", resetConfirm: "کد به حالت اول برگردد؟ تغییرات پاک می‌شود.", exerciseDescPrefix: "تمرین {num}:", briefSectionHints: "راهنماها", briefSectionSolution: "راه‌حل", quizResult: "نتیجه‌ی آزمون", quizPerfect: "نمره‌ی کامل!", quizTryAgain: "دوباره تلاش کن", quizScoreLabel: "نمره‌ی تو", quizResults: "نتایج", hintLabel: "راهنما", solutionLabel: "راه‌حل", noDoc: "سندی انتخاب نشده", language: "زبان"
+  };
+  var MIN_ATTEMPTS_FOR_SOLUTION = 3;
+  function getText(key) {
+    var v = state.lang === "fa" && faTexts[key] !== undefined ? faTexts[key] : (TEXT[key] || key);
+    if (v === undefined) return key;
+    if (typeof v !== "string") return v;
+    var n = state.lastResult ? (state.lastResult.attempts || 0) : 0;
+    return v.replace(/\{N\}/g, n).replace(/\{MIN\}/g, MIN_ATTEMPTS_FOR_SOLUTION || 3);
+  }
+
   var dom = {
     boot: $("boot"), bootMsg: $("bootMsg"), app: $("app"),
     searchInput: $("searchInput"),
@@ -135,7 +166,7 @@
       return;
     }
 
-    api("/api/curriculum")
+    api("/api/curriculum?lang=" + state.lang)
       .then(function (data) {
         state.curriculum = data;
         return api("/api/progress");
@@ -283,7 +314,7 @@
   }
 
   function openLesson(id) {
-    api("/api/doc?id=" + encodeURIComponent(id)).then(function (doc) {
+    api("/api/doc?id=" + encodeURIComponent(id) + "&lang=" + state.lang).then(function (doc) {
       if (doc.error) { toast(doc.error, "error"); return; }
       state.docId = id;
       state.docKind = "markdown";
@@ -307,7 +338,7 @@
   }
 
   function openProject(id) {
-    api("/api/doc?id=" + encodeURIComponent(id)).then(function (doc) {
+    api("/api/doc?id=" + encodeURIComponent(id) + "&lang=" + state.lang).then(function (doc) {
       if (doc.error) { toast(doc.error, "error"); return; }
       state.docId = id;
       state.docKind = "project";
@@ -347,7 +378,7 @@
   /* ── تمرین ── */
 
   function loadExercise(id, keepDoc) {
-    api("/api/exercise?id=" + encodeURIComponent(id)).then(function (ex) {
+    api("/api/exercise?id=" + encodeURIComponent(id) + "&lang=" + state.lang).then(function (ex) {
       if (ex.error) { toast(ex.error, "error"); return; }
       state.exercise = ex;
       state.exerciseId = ex.id;
@@ -708,7 +739,7 @@
   function showHint() {
     if (!state.exerciseId) { toast("اول یک تمرین را باز کن.", "error"); return; }
     var level = state.hintLevel + 1;
-    api("/api/hint?exercise=" + encodeURIComponent(state.exerciseId) + "&level=" + level)
+    api("/api/hint?exercise=" + encodeURIComponent(state.exerciseId) + "&level=" + level + "&lang=" + state.lang)
       .then(function (data) {
         if (data.error) { toast(data.error, "error"); return; }
         state.hintLevel = data.level;
@@ -729,7 +760,7 @@
 
   function showSolution() {
     if (!state.exerciseId) { toast("اول یک تمرین را باز کن.", "error"); return; }
-    api("/api/solution?id=" + encodeURIComponent(state.exerciseId)).then(function (data) {
+    api("/api/solution?id=" + encodeURIComponent(state.exerciseId) + "&lang=" + state.lang).then(function (data) {
       if (data.error) { toast(data.error, "error"); return; }
       if (data.locked) {
         toast(data.message, "error");
@@ -761,7 +792,7 @@
     dom.docSelect.value = "";
 
     dom.docBody.innerHTML = '<div class="quiz" id="quizRoot"><p class="diag__empty">در حال آماده‌سازی…</p></div>';
-    api("/api/quiz_questions").then(function (data) {
+    api("/api/quiz_questions?lang=" + state.lang).then(function (data) {
       if (!data.questions || !data.questions.length) {
         dom.docBody.innerHTML = '<p class="diag__empty">بانک سؤالات در دسترس نیست.</p>';
         return;
@@ -811,7 +842,7 @@
   }
 
   function submitQuiz(answers, questions) {
-    post("/api/quiz", { answers: answers }).then(function (result) {
+    post("/api/quiz", { answers: answers, lang: state.lang }).then(function (result) {
       var root = $("quizRoot");
       var head = root.querySelector(".quiz__q");
       var summary = document.createElement("div");
@@ -877,7 +908,7 @@
     }
 
     lessons.forEach(function (lesson) {
-      api("/api/doc?id=" + encodeURIComponent(lesson.id)).then(function (doc) {
+      api("/api/doc?id=" + encodeURIComponent(lesson.id) + "&lang=" + state.lang).then(function (doc) {
         if (!doc.error) {
           var lower = doc.body.toLowerCase();
           var needle = q.toLowerCase();
