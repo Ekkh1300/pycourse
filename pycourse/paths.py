@@ -16,7 +16,7 @@ FROZEN = bool(getattr(sys, "frozen", False))
 
 # Application language: "fa" (Persian/RTL) or "en" (English/LTR)
 # Override at runtime with: pycourse.paths.set_language("en")
-LANGUAGE: str = "fa"
+LANGUAGE: str = "en"
 
 
 def set_language(lang: str) -> None:

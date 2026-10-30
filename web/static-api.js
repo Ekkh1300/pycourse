@@ -9,8 +9,22 @@
 (function () {
   "use strict";
 
-  var COURSE = window.__COURSE__ || {};
+  var COURSE_BILINGUAL = window.__COURSE__ || {};
   var PROGRESS_KEY = "pycourse.progress.static";
+
+  function currentLanguage() {
+    return loadProgress().lang === "fa" ? "fa" : "en";
+  }
+
+  function courseData(lang) {
+    lang = lang === "fa" ? "fa" : (lang === "en" ? "en" : currentLanguage());
+    if (COURSE_BILINGUAL.en || COURSE_BILINGUAL.fa) {
+      return COURSE_BILINGUAL[lang] || COURSE_BILINGUAL.en || {};
+    }
+    return COURSE_BILINGUAL;
+  }
+
+  var COURSE = courseData();
   var pyodide = null;
   /* وعده‌ی در جریانِ بارگذاری.
 
@@ -28,7 +42,11 @@
   function loadProgress() {
     try {
       var raw = localStorage.getItem(PROGRESS_KEY);
-      if (raw) return JSON.parse(raw);
+      if (raw) {
+        var state = JSON.parse(raw);
+        if (state.lang !== "fa" && state.lang !== "en") state.lang = "en";
+        return state;
+      }
     } catch (e) { /* بی‌خیال */ }
     return {
       lessons_done: [],
@@ -38,6 +56,7 @@
       font_size: 15,
       theme: "amber",
       notes: {},
+      lang: "en",
     };
   }
 
@@ -234,18 +253,18 @@
   }
 
   function findExercise(id) {
-    var list = COURSE.exercises || [];
+    var list = courseData().exercises || [];
     for (var i = 0; i < list.length; i++) {
       if (list[i].id === id) return list[i];
     }
     // بعضی تمرین‌ها در پوشه‌ی پروژه‌ها هستند (مثل first_steps درس ۰).
     // سرور خودش به projects/ سر می‌زند؛ اینجا از قبل داخل داده‌ها هست.
-    var extra = COURSE.extraExercises || {};
+    var extra = courseData().extraExercises || {};
     return extra[id] || null;
   }
 
   function findLesson(id) {
-    var list = COURSE.lessons || [];
+    var list = courseData().lessons || [];
     for (var i = 0; i < list.length; i++) {
       if (list[i].id === id) return list[i];
     }
@@ -253,7 +272,7 @@
   }
 
   function findProject(id) {
-    var list = COURSE.projects || [];
+    var list = courseData().projects || [];
     for (var i = 0; i < list.length; i++) {
       if (list[i].id === id) return list[i];
     }
@@ -279,27 +298,34 @@
       var r = route(path);
 
       if (r.clean === "/api/curriculum") {
+        var requestedLang = r.query.lang === "fa" ? "fa" : (r.query.lang === "en" ? "en" : currentLanguage());
+        var selectedCourse = COURSE_BILINGUAL[requestedLang] || COURSE_BILINGUAL;
         return Promise.resolve({
-          lessons: (COURSE.lessons || []).map(function (l) {
+          lang: requestedLang,
+          lessons: (selectedCourse.lessons || []).map(function (l) {
             return { id: l.id, number: l.id.split("_")[0], title: l.title };
           }),
-          exercises: (COURSE.exercises || []).map(function (e) {
+          exercises: (selectedCourse.exercises || []).map(function (e) {
             return {
               id: e.id, number: e.number, title: e.title,
               description: e.description, filename: e.id + ".py",
               has_solution: e.has_solution,
             };
           }),
-          projects: (COURSE.projects || []).map(function (p) {
+          projects: (selectedCourse.projects || []).map(function (p) {
             return { id: p.id, title: p.title, filename: p.id + ".md" };
           }),
-          quiz_count: ((COURSE.quiz || {}).questions || []).length,
+          quiz_count: ((selectedCourse.quiz || {}).questions || []).length,
           python_version: "3.11 (Pyodide)",
         });
       }
 
       if (r.clean === "/api/progress") {
         return Promise.resolve(loadProgress());
+      }
+
+      if (r.clean === "/api/health") {
+        return Promise.resolve({ ok: true, python: "pyodide", lang: loadProgress().lang || "en" });
       }
 
       if (r.clean === "/api/doc") {
@@ -332,13 +358,13 @@
           source: ex.user_part + ex.tests_part,
           user_part: ex.user_part,
           tests_part: ex.tests_part,
-          hints: (COURSE.hints || {})[ex.id] || COURSE.generalHints || [],
+          hints: (courseData().hints || {})[ex.id] || courseData().generalHints || [],
           attempts: (state.attempts || {})[ex.id] || 0,
         });
       }
 
       if (r.clean === "/api/hint") {
-        var pool = (COURSE.hints || {})[r.query.exercise] || COURSE.generalHints || [];
+        var pool = (courseData().hints || {})[r.query.exercise] || courseData().generalHints || [];
         var level = Math.max(1, Math.min(parseInt(r.query.level, 10) || 1, pool.length));
         return Promise.resolve({
           level: level, total: pool.length, hint: pool[level - 1],
@@ -358,22 +384,18 @@
               attempts + " بار تلاش کرده‌ای — اول راهنماها را بخوان.",
           });
         }
-        var solution = (COURSE.solutions || {})[r.query.id];
+        var solution = (courseData().solutions || {})[r.query.id];
         if (!solution) {
           return Promise.resolve({ error: "برای این تمرین راه‌حل آماده نشده" });
         }
         return Promise.resolve({ locked: false, source: solution, note: "" });
       }
 
-      if (r.clean === "/api/quiz_questions") {
+      if (r.clean === "/api/quiz" || r.clean === "/api/quiz_questions") {
         return Promise.resolve({
-          questions: (COURSE.quiz || {}).questions || [],
-          total: ((COURSE.quiz || {}).questions || []).length,
+          questions: (courseData().quiz || {}).questions || [],
+          total: ((courseData().quiz || {}).questions || []).length,
         });
-      }
-
-      if (r.clean === "/api/health") {
-        return Promise.resolve({ ok: true, python: "pyodide" });
       }
 
       return Promise.resolve({ error: "مسیر پیدا نشد" });
@@ -385,6 +407,16 @@
 
       if (r.clean === "/api/run") {
         return runCode(body);
+      }
+
+      if (r.clean === "/api/set-language") {
+        if (body.lang !== "fa" && body.lang !== "en") {
+          return Promise.resolve({ error: "Invalid language" });
+        }
+        var languageState = loadProgress();
+        languageState.lang = body.lang;
+        saveProgress(languageState);
+        return Promise.resolve({ ok: true, lang: body.lang });
       }
 
       if (r.clean === "/api/progress") {
@@ -420,8 +452,8 @@
 
       if (r.clean === "/api/quiz") {
         var answers = body.answers || [];
-        var bank = (COURSE.quiz || {}).questions || [];
-        var key2 = (COURSE.quiz || {}).answers || [];
+        var bank = (courseData().quiz || {}).questions || [];
+        var key2 = (courseData().quiz || {}).answers || [];
         var results = [];
         var score = 0;
         bank.forEach(function (question, index) {
@@ -433,7 +465,7 @@
             chosen: chosen,
             correct_index: key2[index],
             is_correct: correct,
-            why: (COURSE.quizWhys || [])[index] || "",
+            why: (courseData().quizWhys || [])[index] || "",
             question: question.q,
             options: question.options,
           });

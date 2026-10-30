@@ -30,7 +30,7 @@ def main() -> int:
     failed = 0
 
     for ex_id in EXERCISES:
-        ex = content.read_exercise(ex_id)
+        ex = content.read_exercise(ex_id, "fa")
         sol_path = ROOT / "solutions" / f"{ex_id}_sol.py"
         if not sol_path.exists():
             print(f"✗ {ex_id}: راه‌حل موجود نیست")

@@ -1,236 +1,150 @@
 """
-آزمون سریع پایتون — ۲۰ سوال چهارگزینه‌ای
-================================================================
-اجرا:  python practice/quiz.py
+Python Course — Practice Quiz
+===============================================
+Run: python practice/quiz.py
 
-هدف: بعد از هر ۲-۳ درس، یک بار این آزمون را بده تا ببینی چقدر بلدی.
-نمره‌ی کمتر از ۷۰٪ یعنی باید برگردی و درس را دوباره بخوانی.
+A multiple-choice quiz to test your Python knowledge.
 """
 
-import os
 import sys
 
-# ویندوز: کنسول پیش‌فرض cp1252 است و متن فارسی را خراب می‌کنند — این خط‌ها حلش می‌کنند
+# Windows: Console default cp1252 messes with Persian. This fixes it.
 for _stream in (sys.stdout, sys.stderr):
     if hasattr(_stream, "reconfigure"):
         _stream.reconfigure(encoding="utf-8", errors="replace")
 
 QUESTIONS = [
     {
-        "q": "خروجی `5 / 2` چیست؟",
-        "options": ["2", "2.5", "2.0", "خطا"],
+        "q": "What is the result of `5 / 2`?",
+        "options": ["2", "2.5", "2.0", "Undefined"],
         "answer": 1,
-        "why": "`/` همیشه نتیجه‌ی float می‌دهد. برای تقسیم صحیح از `//` استفاده کن.",
+        "why": "`/` always returns a float in Python. `5 / 2` → `2.5`. "
+                "Use `//` for floor division (integer division).",
     },
     {
-        "q": "خروجی `bool(\"False\")` چیست؟",
-        "options": ["False", "True", "خطا", "None"],
+        "q": "What does `bool(\"False\")` return?",
+        "options": ["False", "True", "Undefined", "None"],
         "answer": 1,
-        "why": "هر رشته‌ی غیرخالی (حتی \"False\") در پایتون True است.",
+        "why": "Any non-empty string is truthy in Python, including \"False\". "
+                "Only empty string `\"\"` evaluates to `False`.",
     },
     {
-        "q": "خروجی `10 / 2 == 5` چیست؟",
-        "options": ["True", "False", "خطا", "5.0"],
-        "answer": 0,
-        "why": "‎10/2 می‌شود 5.0 و مقدار 5.0 == 5 برابر است.",
-    },
-    {
-        "q": "کدام‌یک مقدار `None` برمی‌گرداند؟",
+        "q": "Which of the following is the correct way to define a function?",
         "options": [
-            "def f(): return 0",
-            "def f(): print(0)",
-            "def f(): return None",
-            "همه‌ی موارد بالا",
+            "def my_func(): ...",
+            "function my_func(): ...",
+            "def my_func { ... }",
+            "func my_func(): ...",
         ],
-        "answer": 3,
-        "why": "تابعی که `return` ندارد همیشه None برمی‌گرداند.",
-    },
-    {
-        "q": "خروجی `nums[1:3]` برای `nums = [0,1,2,3,4]` چیست؟",
-        "options": ["[1, 2]", "[1, 2, 3]", "[0, 1, 2]", "[2, 3]"],
         "answer": 0,
-        "why": "برش شامل اندیس دوم نیست: از ۱ تا قبل از ۳.",
+        "why": "Python uses the `def` keyword to define functions.",
     },
     {
-        "q": "برای خواندن امن کلید دیکشنری از کدام استفاده می‌کنیم؟",
-        "options": ["d[k]", "d.get(k)", "d[k:]", "d.pop(k)"],
+        "q": "What is the output of `print(10 // 3)`?",
+        "options": ["3", "3.33", "3.0", "Error"],
+        "answer": 0,
+        "why": "`//` is floor division, which returns the integer part: `10 // 3` → `3`.",
+    },
+    {
+        "q": "How do you create a list with items 1, 2, 3?",
+        "options": ["list(1, 2, 3)", "[1, 2, 3]", "(1, 2, 3)", "{1, 2, 3}"],
         "answer": 1,
-        "why": "`.get()` وقتی کلید نبود None برمی‌گرداند به‌جای KeyError.",
+        "why": "Square brackets `[]` create a list in Python.",
     },
     {
-        "q": "خروجی `list(range(2, 10, 3))` چیست؟",
-        "options": ["[2,3,4,5,6,7,8,9]", "[2,5,8]", "[3,6,9]", "[2,10]"],
+        "q": "What does the following code output?\n\n```python\nx = 5\nif x > 3:\n    print(\"A\")\nelif x > 10:\n    print(\"B\")\nelse:\n    print(\"C\")\n```",
+        "options": ["A", "B", "C", "Nothing"],
+        "answer": 0,
+        "why": "Since `x = 5` and `5 > 3` is True, the first branch prints \"A\". "
+                "`elif` and `else` are skipped.",
+    },
+    {
+        "q": "Which method adds an item to the END of a list?",
+        "options": ["append()", "insert()", "push()", "add()"],
+        "answer": 0,
+        "why": "`list.append(x)` adds `x` to the end of the list. "
+                "`list.insert(i, x)` adds at position `i`.",
+    },
+    {
+        "q": "What is the result of `fruits[::-1]` where `fruits = [\"apple\", \"banana\", \"cherry\"]`?",
+        "options": ["[\"apple\", \"banana\", \"cherry\"]", "[\"cherry\", \"banana\", \"apple\"]", "[\"banana\", \"apple\", \"cherry\"]", "Error"],
         "answer": 1,
-        "why": "range(شروع، پایان، گام) — پایان شامل نمی‌شود.",
+        "why": "`[::-1]` is a slice that reverses the list.",
     },
     {
-        "q": "اگر تابعی `return` نداشته باشد، چه برمی‌گرداند؟",
-        "options": ["0", "None", "False", "خطا"],
+        "q": "What does `dict.get(key)` return if the key doesn't exist?",
+        "options": ["KeyError", "None", "0", "Undefined"],
         "answer": 1,
-        "why": "پایتون به‌صورت خودکار None برمی‌گرداند.",
+        "why": "`dict.get(key)` returns `None` by default if key is missing, "
+                "unlike `dict[key]` which raises `KeyError`.",
     },
     {
-        "q": "کدام ساختار برای «کلید → مقدار» مناسب است؟",
-        "options": ["list", "tuple", "dict", "set"],
+        "q": "Which of the following creates a set (not a list)?",
+        "options": ["[1, 2, 3]", "{1, 2, 3}", "(1, 2, 3)", "<1, 2, 3>"],
+        "answer": 1,
+        "why": "Curly braces `{1, 2, 3}` create a set. Square brackets create a list.",
+    },
+    {
+        "q": "What is the output of `sum(range(5))`?",
+        "options": ["0", "5", "10", "15"],
         "answer": 2,
-        "why": "dict نگاشت کلید به مقدار است.",
+        "why": "`range(5)` produces 0, 1, 2, 3, 4. Their sum is 0+1+2+3+4 = 10.",
     },
     {
-        "q": "خروجی `len(\"سلام\")` چیست؟",
-        "options": ["3", "4", "5", "خطا"],
+        "q": "Which keyword is used to import a specific function from a module?",
+        "options": ["import", "from ... import", "include", "require"],
         "answer": 1,
-        "why": "len روی رشته تعداد کاراکترها (کدپوینت‌ها) را می‌دهد، نه حروف.",
+        "why": "Python uses `from module import function` to import specific functions.",
     },
     {
-        "q": "کدام روش برای افزودن به **آخر** لیست است؟",
-        "options": ["insert(0, x)", "append(x)", "extend_end(x)", "push(x)"],
+        "q": "What does `len(\"hello\")` return?",
+        "options": ["4", "5", "6", "Error"],
         "answer": 1,
-        "why": "`append` اضافه می‌کند، `insert` در اندیس دلخواه جا می‌دهد.",
-    },
-    {
-        "q": "خروجی این کد چیست؟\n```\na = [1,2]\nb = a\nb.append(3)\nprint(a)\n```",
-        "options": ["[1, 2]", "[1, 2, 3]", "[3]", "خطا"],
-        "answer": 1,
-        "why": "b همان لیست a است (نه کپی). برای کپی از `a.copy()` استفاده کن.",
-    },
-    {
-        "q": "کدام روش فایل را حتی در صورت خطا می‌بندد؟",
-        "options": ["open(f).read()", "with open(f) as g:", "f = open(f)", "read(f)"],
-        "answer": 1,
-        "why": "بلوک `with` مدیر زمینه است و فایل را تضمینی می‌بندد.",
-    },
-    {
-        "q": "برای گرفتن ورودی عددی از کاربر چه می‌نویسیم؟",
-        "options": [
-            "number = input()",
-            "number = int(input())",
-            "number = float(input())",
-            "number = input(int())",
-        ],
-        "answer": 1,
-        "why": "input همیشه رشته می‌دهد، پس باید تبدیل کنی.",
-    },
-    {
-        "q": "خروجی این کد چیست؟\n```\nfor i in range(3):\n    if i == 1:\n        continue\n    print(i)\n```",
-        "options": ["0 1 2", "0 2", "1", "0"],
-        "answer": 1,
-        "why": "`continue` آن دور را رد می‌کند، پس ۱ چاپ نمی‌شود.",
-    },
-    {
-        "q": "کدام گزینه برای مقدار پیش‌فرض یک تابع **اشتباه** است؟",
-        "options": [
-            "def f(x=0): ...",
-            "def f(x=None): ...",
-            "def f(x=[]): ...",
-            "def f(x='hi'): ...",
-        ],
-        "answer": 2,
-        "why": "لیست پیش‌فرض بین فراخوانی‌ها مشترک می‌ماند — تله‌ی کلاسیک.",
-    },
-    {
-        "q": "در کلاس، `self` به چه اشاره دارد؟",
-        "options": ["کلاس", "خودِ شیء جاری", "ماژول", "تابع"],
-        "answer": 1,
-        "why": "`self` یعنی همین نمونه. `cls` یعنی خودِ کلاس.",
-    },
-    {
-        "q": "خروجی `[i*i for i in range(5) if i % 2 == 0]` چیست؟",
-        "options": ["[0, 4, 16]", "[0, 1, 4, 9, 16]", "[0, 2, 4]", "[1, 3]"],
-        "answer": 0,
-        "why": "Comprehension با شرط: فقط اعداد زوج، مربع‌شان.",
-    },
-    {
-        "q": "برای حذف تکراری‌ها از یک لیست، بهترین گزینه چیست؟",
-        "options": ["set(list)", "list(set(lst))", "lst.unique()", "remove_duplicates(lst)"],
-        "answer": 1,
-        "why": "`set` یکتا می‌کند؛ برای برگرداندن لیست باید دوباره به لیست تبدیل شود (ترتیب تضمین نمی‌شود).",
-    },
-    {
-        "q": "کدام کد درست یک فایل را با انکدینگ مناسب می‌خواند؟",
-        "options": [
-            'open("f.txt", "r")',
-            'open("f.txt", "r", encoding="utf-8")',
-            'open("f.txt", "rb")',
-            'read_file("f.txt")',
-        ],
-        "answer": 1,
-        "why": "برای متن فارسی حتماً `encoding=\"utf-8\"` را بنویس.",
+        "why": "`len()` returns the number of items. A string of 5 characters returns 5.",
     },
 ]
 
-GREEN = "\033[92m"
-RED = "\033[91m"
-YELLOW = "\033[93m"
-CYAN = "\033[96m"
-RESET = "\033[0m"
-
-
-def main() -> int:
-    # اگر خروجی در ترمینال واقعی نبود، رنگ‌ها را خاموش کن
-    use_color = sys.stdout.isatty() and (
-        os.name != "nt" or "WT_SESSION" in os.environ or "ANSICON" in os.environ
-    )
-
-    def c(color: str, text: str) -> str:
-        return f"{color}{text}{RESET}" if use_color else text
-
-    print("=" * 60)
-    print("  آزمون سریع پایتون — ۲۰ سوال")
-    print("=" * 60)
-    print("  برای هر سوال یکی از حروف‌های a/b/c/d را وارد کن (یا شماره).\n")
+# ═════════════════════════════════════════════════════════════
+#  Run the quiz
+# ═════════════════════════════════════════════════════════════
+if __name__ == "__main__":
+    print("Python Practice Quiz")
+    print("=" * 40)
+    print(f"Total questions: {len(QUESTIONS)}")
+    print()
 
     score = 0
-    wrong_questions = []
-
-    for i, item in enumerate(QUESTIONS, start=1):
-        print(c(CYAN, f"سوال {i}:") + f" {item['q']}")
-        for j, opt in enumerate(item["options"]):
-            print(f"   {chr(97 + j)}) {opt}")
+    for i, q in enumerate(QUESTIONS):
+        print(f"Q{i+1}. {q['q']}")
+        for j, opt in enumerate(q["options"]):
+            print(f"   {j}) {opt}")
+        print()
 
         while True:
-            raw = input("پاسخ: ").strip().lower()
-            if raw in "abcd" and len(raw) == 1:
-                choice = "abcd".index(raw)
-                break
-            if raw.isdigit() and 1 <= int(raw) <= len(item["options"]):
-                choice = int(raw) - 1
-                break
-            print(c(YELLOW, "  ورودی نامعتبر — دوباره تلاش کن."))
+            try:
+                choice = int(input("Your answer (number): "))
+                if 0 <= choice < len(q["options"]):
+                    break
+                print(f"Please enter 0-{len(q['options']) - 1}.")
+            except ValueError:
+                print("Please enter a number.")
 
-        if choice == item["answer"]:
+        if choice == q["answer"]:
+            print("✅ Correct!")
             score += 1
-            print(c(GREEN, "  ✓ درست\n"))
         else:
-            wrong_questions.append((i, item))
-            correct = chr(97 + item["answer"])
-            print(c(RED, f"  ✗ نادرست. پاسخ درست: {correct}) {item['options'][item['answer']]}"))
-            print(c(YELLOW, f"    💡 {item['why']}\n"))
+            correct_opt = q["options"][q["answer"]]
+            print(f"❌ Wrong. The correct answer was: {q['answer']}) {correct_opt}")
+        print(f"   Why: {q['why']}")
+        print()
 
-    total = len(QUESTIONS)
-    percent = round(score / total * 100)
-
-    print("=" * 60)
-    if percent >= 90:
-        grade = "عالی! 🎉 آماده‌ی مسیر تخصصی هستی."
-    elif percent >= 70:
-        grade = "خوب 👍 فقط مرور کن و ادامه بده."
+    print("=" * 40)
+    print(f"Your score: {score}/{len(QUESTIONS)}")
+    percentage = (score / len(QUESTIONS)) * 100
+    print(f"Percentage: {percentage:.1f}%")
+    if percentage >= 80:
+        print("🎉 Excellent!")
+    elif percentage >= 60:
+        print("👍 Good job!")
     else:
-        grade = "نیاز به مرور داری — درس‌های ۱ تا ۴ را دوباره بخوان."
-    print(f"  نمره: {score} از {total}  ({percent}٪)")
-    print(f"  نتیجه: {grade}")
-
-    if wrong_questions:
-        print("\n  سوال‌هایی که اشتباه زدی:")
-        for num, item in wrong_questions:
-            print(f"   - سوال {num}: {item['q'].splitlines()[0]}")
-
-    print("=" * 60)
-    return 0
-
-
-if __name__ == "__main__":
-    try:
-        sys.exit(main())
-    except (KeyboardInterrupt, EOFError):
-        print("\n  آزمون لغو شد. هر وقت خواستی دوباره اجرا کن.")
-        sys.exit(0)
+        print("Keep practicing! You'll get there.")

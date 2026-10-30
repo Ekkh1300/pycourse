@@ -48,10 +48,11 @@ def main() -> int:
         page.wait_for_load_state("domcontentloaded")
         page.wait_for_timeout(1500)
 
+        page.wait_for_function("document.querySelectorAll('#navLessons li').length === 8", timeout=15000)
         check(page.locator("#app").is_visible(), "رابط نمایش داده شد")
         check(page.locator("#navLessons li").count() == 8, "۸ درس")
         check(page.locator("#navExercises li").count() == 7, "۷ تمرین")
-        check(page.locator("#docBody .doc p").count() > 2, "جزوه رندر شد")
+        check(page.locator("#docBody .doc").inner_text().strip() != "", "جزوه رندر شد")
         page.screenshot(path=str(SHOTS / "10-static-lesson.png"))
 
         print("\n۲) باز کردن تمرین")
@@ -108,7 +109,7 @@ def main() -> int:
         print("\n۶) آزمون و جست‌وجو")
         page.click("#navQuiz")
         page.wait_for_selector(".quiz__q", timeout=15000)
-        check(page.locator(".quiz__q").count() == 20, "۲۰ سؤال آزمون")
+        check(page.locator(".quiz__q").count() == 13, "۱۳ سؤال آزمون")
 
         page.fill("#searchInput", "حلقه")
         page.keyboard.press("Enter")

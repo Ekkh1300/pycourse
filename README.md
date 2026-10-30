@@ -1,57 +1,59 @@
-# 🐍 ترمینال پایتون — محیط گرافیکی آموزش مقدماتی
+<div align="center">
 
-یک برنامه‌ی محلی که **جزوه را سمت راست** نگه می‌دارد و **کدت را سمت چپ** می‌نویسی. زبان **فارسی (منطقه مرزی)** یا **انگلیسی (LTR)** با دکمه 🌐 در نوار عنوان.
-هر خطای پایتون را می‌گیرد و **به فارسی توضیح می‌دهد** که چه شد، چرا شد و چه باید کرد.
+# 🐍 Python Terminal — Interactive Beginner Python Course
 
-هیچ وابستگی بیرونی لازم نیست — فقط کتابخانه‌ی استاندارد پایتون.
+**A local, browser-based Python learning environment with an editor, lessons, exercises, and instant code feedback.**
 
----
+[![Latest Release](https://img.shields.io/github/v/release/Ekkh1300/pycourse?label=latest%20release)](https://github.com/Ekkh1300/pycourse/releases/latest)
+[![License](https://img.shields.io/github/license/Ekkh1300/pycourse)](LICENSE)
 
-## زبان (Fa / En)
+**[Download the latest release](https://github.com/Ekkh1300/pycourse/releases/latest) · [فارسی](#راهنمای-فارسی)**
 
-برنامه پیش‌فرض به **فارسی (RTL)** است. برای تغییر به **انگلیسی (LTR)** دکمه‌ی **🌐 Fa ⇄ En** در نوار عنوان را بزن — زبان بین فارسی و انگلیسی تغییر می‌کند.
+</div>
 
-- تشخیص خطاها و راهنماها در هر دو زبان
-- پیام‌های سرور و UI هم دو زبانه
-- تنظیم زبان از طریق `POST /api/set-language` (مثلاً برای سرویس‌های خودکار)
+Python Terminal is a beginner-friendly course app. Read a lesson, write code, run it, and check your work in one place. Python errors can be explained in Persian or English. The app runs locally and requires no third-party Python packages.
 
-## چطور استفاده کنم
+## Language
 
-نسخه‌های آماده در **[Releases](../../releases)** هستند — جدیدترین نسخه **v1.0.1** (دکمه‌ها دیگر مرده نمی‌شوند) دانلود کن و اجرا:
+The interface defaults to **English (LTR)**. Use **🌐 Fa ⇄ En** in the title bar to switch to **Persian (RTL)** and back. The language preference is saved locally.
 
-| نسخه | فایل | اینترنت | توضیح |
-|---|---|---|---|
-| **ویندوز** | `PythonTerminal.exe` | ❌ نه | دابل‌کلیک. پایتون داخل خودش است. |
-| **وب، آفلاین** | `PythonTerminal-offline.html` | ❌ نه | کل موتور پایتون داخل فایل. حتی از `file://`. |
-| **وب، سبک** | `PythonTerminal.html` | فقط «اجرا» | ۳۲۰ کیلوبایت. برای انتشار روی هر هاست. |
-| **توسعه** | `python app.py` | ❌ نه | سرور محلی با قابلیت دیباگ. |
+Error diagnoses, exercise hints, lessons, exercises, projects, and quiz questions are available in **both English and Persian**. The language toggle switches all course content.
 
-### گوشی موبایل
+## Download and run
 
-رابط کاملاً ریسپانسیو است و روی **آیفون، اندروید و تبلت** تست شده —
-ناوبری پایین صفحه (فهرست / کد / جزوه)، کشوی کناری، هدف لمسی ≥۴۴ پیکسل.
+Download an asset from [GitHub Releases](https://github.com/Ekkh1300/pycourse/releases/latest):
 
-- **بدون انتقال فایل:** برنامه را روی کامپیوتر اجرا کن و دکمه‌ی **📱 گوشی** را
-  بزن؛ آدرس `http://192.168.x.x:8765/` را در مرورگر گوشی باز کن
-  (گوشی باید روی همان وای‌فای باشد).
-- **با فایل:** `PythonTerminal.html` را با واتس‌اپ/ایمیل به خودت بفرست و باز کن.
-  برای آیفون: Files → Share → Open in Safari.
-- **بدون اینترنت:** `PythonTerminal.zip` را بفرست و `PythonTerminal-offline.html`
-  داخلش را باز کن.
+| Download | Internet | Details |
+|---|---:|---|
+| `PythonTerminal.exe` | No | Windows app; double-click to launch. |
+| `PythonTerminal-offline.html` | No | Self-contained HTML app with Pyodide included; can be opened locally. |
+| `PythonTerminal.html` | For Python execution | Lightweight online HTML build; Pyodide is loaded from a CDN. |
+| `PythonTerminal-v1.2.0.zip` | Depends on selected app | ZIP package of the release assets. |
 
-### انتشار روی وب
+### Use on a phone or tablet
 
-فایل `PythonTerminal.html` را آپلود کن به:
-- **GitHub Pages** — فایل را در ریشه‌ی ریپو بگذار و Pages را روشن کن
-- **Netlify / Cloudflare Pages / Vercel** — فایل را بکش و رها کن
-- **هر سرور وب** — فایل را در پوشه‌ی `public_html` بگذار
+- **On the same Wi-Fi:** run `PythonTerminal.exe` or `python app.py` on your computer, then open the displayed network address on your phone.
+- **From a file:** transfer `PythonTerminal-offline.html` to the device and open it in a browser. On iPhone, use Files → Share → Open in Safari.
 
-هیچ بک‌اندی لازم نیست. برای «اجرای کد پایتون» فقط اینترنت می‌خواهد
-(Pyodide از CDN می‌آید، ~۱۰ مگابایت، فقط بارِ اول). بقیه‌ی برنامه کاملاً آفلاین است.
+### Host the HTML build
 
----
+Upload `PythonTerminal.html` to GitHub Pages, Netlify, Cloudflare Pages, Vercel, or another static host. No backend is needed. Running Python uses Pyodide from a CDN (about 10 MB on first use); the offline build bundles Pyodide.
 
-## اجرا از سورس
+## Features
+
+- **8 lessons, 7 exercises, 7 solutions, 3 projects, and a 13-question quiz**
+- Browser editor with Python syntax highlighting, line numbers, indentation, and autosaved exercise code
+- Run code and check each exercise assertion independently
+- Step-by-step exercise hints and solutions unlocked after three attempts
+- Beginner-friendly Python error diagnosis in Persian and English
+- Search across course documents and a command palette (`Ctrl+K`)
+- Responsive desktop, phone, and tablet layouts
+- Amber and CRT themes, adjustable font size, progress tracking, and exercise timer
+- Online and fully offline HTML builds
+
+## Run from source
+
+Requirements: Python 3.10 or newer. The application server uses only the Python standard library. The UI tests additionally require Playwright.
 
 ```bash
 git clone https://github.com/Ekkh1300/pycourse.git
@@ -59,202 +61,112 @@ cd pycourse
 python app.py
 ```
 
-آدرس: <http://127.0.0.1:8765/>
+Open the URL printed by the app (normally <http://127.0.0.1:8765/>). If that port is busy, the app selects another available port.
 
-> پایتون ۳.۱۰ یا جدیدتر لازم است. هیچ بسته‌ی سوم‌طرفی‌ای نیست — فقط
-> کتابخانه‌ی استاندارد (تست‌های UI به `playwright` نیاز دارند).
-
-> اگر پورت ۸۷۶۵ اشغال بود، برنامه خودش پورت بعدی را انتخاب می‌کند.
-
-### ساخت خروجی‌ها
+### Build the release assets
 
 ```powershell
-python build_exe.py            # → dist\PythonTerminal.exe
-python build_html.py           # → dist\PythonTerminal.html  (آنلاین، ۳۲۰ کیلوبایت)
-python build_html.py --download  # فقط یک‌بار: دانلود Pyodide برای نسخه‌ی آفلاین
-python build_html.py           # → dist\PythonTerminal-offline.html  (۱۷ مگابایت)
-python build_release.py        # → هر دو + release\ + zip
+python build_exe.py
+python build_html.py
+python build_html.py --download  # one-time Pyodide download for the offline build
+python build_html.py
+python build_release.py
 ```
 
-> `vendor/` (۱۳ مگابایت Pyodide) دانلود می‌شود و در گیت نیست؛ با دستور
-> `--download` برمی‌گردد. فایل‌های ساخته‌شده هم در گیت نیستند و در
-> **[Releases](../../releases)** قرار دارند.
+Build outputs and the downloaded `vendor/` Pyodide files are not committed. Downloaded and generated release assets are published on the [Releases page](https://github.com/Ekkh1300/pycourse/releases).
 
----
+## Project layout
 
-## چیدمان
-
-```
-┌────────────────────────────────────────────────────────────┐
-│ ترمینال پایتون      [جست‌وجو ⌕]      دستورها  پوسته  A−  ؟  │
-├──────────┬──────────────────────────┬───┬──────────────────┤
-│ درس‌ها   │  ▶ اجرا  ✓ بررسی  ⟲ ⧉ ★ │ ║ │  جزوه            │
-│ تمرین‌ها │ ┌──────────────────────┐ │ ║ │  درس ۲ — …       │
-│ آزمون    │ │  ویرایشگر کد          │ │ ║ │                  │
-│ پروژه‌ها │ │  (شماره خط + رنگ)    │ │ ║ │  متن جزوه         │
-│          │ ├──────────────────────┤ │ ║ │  جدول، کد، فهرست  │
-│          │ │  کنسول / ایرادها     │ │ ║ │                  │
-├──────────┴──────────────────────────┴───┴──────────────────┤
-│ NORMAL │ درس ۲ │ تمرین ۱ │ ۰/۱۹ │ 00:42 │ Python 3.14.5  │
-└────────────────────────────────────────────────────────────┘
-```
-
-- **جداکننده‌ی عمودی** (بین کد و جزوه) را بکش تا نسبت‌ها را عوض کنی.
-- **جداکننده‌ی افقی** (بین ویرایشگر و کنسول) را بکش تا ارتفاع کنسول را تنظیم کنی.
-- `Ctrl+D` پنل جزوه را می‌بندد/باز می‌کند (حالت تمام‌صفحه برای کد).
-- `Ctrl+B` نوار کناری را می‌بندد/باز می‌کند.
-
----
-
-## قابلیت‌ها
-
-### ۱. تشخیص خطا به فارسی
-
-اگر کدت خطا بدهد، به‌جای پیام خشک پایتون، یک کارت تشخیصی می‌بینی:
-
-```
-╭─ NameError ───────────── خط ۱ ─────────╮
-│  چه شد؟  پایتون نامی را که در کدت استفاده  │
-│          کردی پیدا نکرد.                 │
-│  چرا؟   قبل از استفاده‌ی هر متغیر باید آن │
-│          را بسازی. شاید املایش اشتباه است. │
-│  چه کنم؟ ✓ نام را با تعریق مقایسه کن      │
-│          ✓ قبلش متغیر را مقداردهی کن       │
-│          ✓ Did you mean: 'name'?          │
-╰───────────────────────────────────────────╯
+```text
+app.py                 Local HTTP server
+build_exe.py           Build the Windows executable
+build_html.py          Build online and offline single-file HTML apps
+build_release.py       Assemble release assets
+pycourse/              Course and application modules
+  content.py           Read lessons and exercises
+  runner.py            Run user code with a timeout
+  tester.py            Run assertions independently
+  errors_fa.py         Persian Python error diagnoses
+  errors_en.py         English Python error diagnoses
+  hints.py             Persian exercise hints
+  hints_en.py          English exercise hints
+  paths.py             App paths and language preference
+web/                   Browser UI and static API
+lessons/               8 lessons (en/ and fa/)
+exercises/             7 exercises with tests (en/ and fa/)
+solutions/             Exercise solutions
+projects/              3 projects (en/ and fa/)
+practice/quiz.py       Command-line quiz
+tests/                 Automated test suites
 ```
 
-پوشش: `NameError`، `TypeError`، `ValueError`، `SyntaxError`، `IndentationError`،
-`TabError`، `IndexError`، `KeyError`، `AttributeError`، `ZeroDivisionError`،
-`ModuleNotFoundError`، `FileNotFoundError`، `AssertionError`، `RecursionError`،
-`UnboundLocalError` و چند مورد دیگر. خطایی که در جدول نباشد هم باز تشخیص داده
-می‌شود (به‌همراه متن خام پایتون برای مقایسه).
-
-خطی که خطا داده در ویرایشگر **قرمز** می‌شود و شماره‌ی خطش علامت می‌خورد.
-
-### ۲. تست جداگانه برای هر assert
-
-دکمه‌ی **«بررسی»** هر تست را جداگانه اجرا می‌کند و می‌گوید کدام‌ها پاس شدند
-و کدام‌ها نه — برخلاف `assert` معمولی که با اولین خطا کل تست‌ها را متوقف می‌کند.
-
-```
-✗ ۳ تست ناموفق        [▓▓░░░░░░░]  ۱۶/۱۹ تست
-  ✗  name باید 'Ali' باشد، هست: None
-  ✗  evens باید 2 باشد، هست: 3
-  ✗  sum_ab باید 19 باشد، هست: None
-```
-
-### ۳. راهنمای مرحله‌ای و راه‌حل
-
-- دکمه‌ی **؟** سه سطح راهنما باز می‌کند (کلی → مشخص‌تر → تقریباً جواب).
-- دکمه‌ی **★** راه‌حل کامل را نشان می‌دهد — ولی **بعد از ۳ بار تلاش**، تا اول
-  خودت تلاش کنی.
-
-### ۴. ویرایشگر واقعی
-
-- رنگ‌آمیزی سینتکس پایتون
-- شماره‌ی خط + علامت خطا
-- `Tab` چهار فاصله می‌گذارد
-- `Enter` خودش تورفتگی را درست می‌کند (و بعد از `:` یک سطح اضافه می‌کند)
-- ذخیره‌ی خودکار کد هر تمرین در مرورگر (کد از دست نمی‌رود)
-
-### ۵. ابزارهای دیگر
-
-- **آزمون سریع** ۲۰ سوالی با نمره و دلیل هر پاسخ غلط
-- **جست‌وجو در همه‌ی جزوه‌ها**
-- **پالت دستورها** با `Ctrl+K`
-- **دو پوسته**: کهربایی (پیش‌فرض) و سبز CRT
-- **اندازه‌ی فونت** قابل تنظیم
-- **پیشرفت** ذخیره‌شده در `.progress.json`
-- تایمر هر تمرین
-- خروجی خام پایتون برای مقایسه با توضیح فارسی
-
----
-
-## میان‌برهای صفحه‌کلید
-
-| کلید | کار |
-|---|---|
-| `Ctrl + Enter` | اجرای کد |
-| `Ctrl + Shift + Enter` | بررسی با تست‌ها |
-| `Tab` | چهار فاصله |
-| `Ctrl + K` | پالت دستورها |
-| `Ctrl + B` | نوار کناری |
-| `Ctrl + D` | پنل جزوه |
-| `Ctrl + Alt + T` | تغییر پوسته |
-| `Ctrl + Alt + ↑ / ↓` | اندازه‌ی فونت |
-| `F1` | راهنمای میان‌برها |
-| `/` | جست‌وجو |
-| `Esc` | بستن پنجره‌ها |
-
----
-
-## ساختار پوشه
-
-```
-pycourse/
-├── app.py              سرور (فقط کتابخانه‌ی استاندارد)
-├── start.bat           اجرای با یک کلیک
-├── build_exe.py        ساخت exe با PyInstaller
-├── build_html.py       ساخت نسخه‌ی وب تک‌فایلی (آنلاین + آفلاین)
-├── build_release.py    ساخت بسته‌ی نهایی
-├── pycourse/           هسته‌ی برنامه
-│   ├── content.py      خواندن درس‌ها و تمرین‌ها از دیسک
-│   ├── runner.py       اجرای امن کد (با تایم‌اوت)
-│   ├── tester.py       ساخت اسکریپت اجرای جداگانه‌ی هر تست
-│   ├── errors_fa.py    ترجمه و توضیح خطاها به فارسی
-│   ├── hints.py        راهنمای مرحله‌ای هر تمرین
-│   ├── progress.py     ذخیره‌ی پیشرفت
-│   └── paths.py        مسیرها (عادي / بسته‌بندی‌شده)
-├── web/                رابط کاربری
-│   ├── index.html
-│   ├── style.css       پوسته‌ی «فُسفر کهربایی» + چیدمان موبایل
-│   ├── app.js          منطق برنامه
-│   ├── md.js           رندرکننده‌ی مارک‌داون (آفلاین)
-│   ├── highlight.js    رنگ‌آمیزی سینتکس پایتون
-│   └── static-api.js   لایه‌ی API برای نسخه‌ی وب (Pyodide)
-├── lessons/            ۸ درس
-├── exercises/          ۷ تمرین با تست خودکار
-├── solutions/          راه‌حل هر تمرین
-├── projects/           ۳ پروژه + تمرین دستی
-├── practice/quiz.py    آزمون خط فرمانی
-├── tests/              تست‌های خودکار برنامه
-├── vendor/             Pyodide دانلودشده (نادیده گرفته می‌شود)
-├── build/              میان‌فایل‌های ساخت (نادیده گرفته می‌شود)
-├── dist/               خروجی‌های خام (نادیده گرفته می‌شود)
-└── release/            بسته‌ی نهایی (نادیده گرفته می‌شود)
-```
-
----
-
-## محتوای دوره
-
-| درس | موضوع |
-|---|---|
-| ۰ | راه‌اندازی و اولین برنامه |
-| ۱ | متغیرها، انواع داده و عملگرها |
-| ۲ | شرط‌ها و حلقه‌ها |
-| ۳ | لیست، تاپل، دیکشنری و ست |
-| ۴ | توابع |
-| ۵ | فایل، مدیریت خطا و ماژول |
-| ۶ | کلاس‌ها و شیءگرایی |
-| ۷ | ابزارهای حرفه‌ای (comprehension، lambda، دکوریتور) |
-
-بعد از این، سه مسیر تخصصی: **اتوماسیون**، **وب و بک‌اند**، **هوش مصنوعی و ML**.
-
----
-
-## تست خودکار برنامه
+## Tests
 
 ```powershell
-python tests\_test_diag.py       # تشخیص خطاها
-python tests\_test_solutions.py  # همه‌ی راه‌حل‌ها همه‌ی تست‌ها را پاس کنند
-python tests\_test_api.py        # APIهای سرور (سرور باید بالا باشد)
-python tests\_test_ui.py         # رابط کاربری با Playwright
-python tests\_test_static.py     # نسخه‌ی HTML (نیاز: اینترنت برای Pyodide)
-python tests\_test_offline.py    # نسخه‌ی آفلاین (بدون شبکه)
-python tests\_test_mobile.py     # موبایل و تبلت (۳ دستگاه × ۳ هدف)
+python tests\_test_diag.py
+python tests\_test_solutions.py
+python tests\_test_api.py
+python tests\_test_ui.py
+python tests\_test_static.py
+python tests\_test_offline.py
+python tests\_test_mobile.py
+python tests\_test_recovery.py
 ```
 
-> تست‌های UI به `playwright` نیاز دارند:
-> `pip install playwright && playwright install chromium`
+UI tests require Playwright:
+
+```powershell
+pip install playwright
+playwright install chromium
+```
+
+## Contributing
+
+Issues and pull requests are welcome. Please include steps to reproduce bugs and run the relevant tests before submitting changes.
+
+## فارسی
+
+### معرفی
+
+**ترمینال پایتون** یک محیط محلی و مرورگرمحور برای یادگیری مقدماتی پایتون است. درس بخوانید، کد بنویسید و اجرا کنید و تمرین‌ها را بررسی کنید. تشخیص خطاها و راهنماهای تمرین به فارسی و انگلیسی در دسترس‌اند.
+
+### زبان برنامه
+
+زبان پیش‌فرض رابط **انگلیسی (چپ‌به‌راست)** است. با دکمه‌ی **🌐 Fa ⇄ En** در نوار عنوان، زبان رابط را به **فارسی (راست‌به‌چپ)** تغییر دهید. انتخاب زبان ذخیره می‌شود.
+
+**توجه:** متن درس‌ها، تمرین‌ها، پروژه‌ها و آزمون به **هر دو زبان فارسی و انگلیسی** موجود است و با دکمه‌ی زبان قابل تغییر است.
+
+### دریافت و اجرا
+
+از [صفحه‌ی انتشارها](https://github.com/Ekkh1300/pycourse/releases/latest) یکی از فایل‌ها را دریافت کنید:
+
+- `PythonTerminal.exe` — برنامه‌ی ویندوز، بدون نیاز به نصب پایتون.
+- `PythonTerminal-offline.html` — نسخه‌ی HTML کاملاً آفلاین.
+- `PythonTerminal.html` — نسخه‌ی سبک آنلاین؛ برای اجرای پایتون به اینترنت نیاز دارد.
+- `PythonTerminal-v1.2.0.zip` — بسته‌ی ZIP فایل‌های انتشار.
+
+برای اجرا از سورس، پایتون ۳.۱۰ یا جدیدتر لازم است:
+
+```bash
+git clone https://github.com/Ekkh1300/pycourse.git
+cd pycourse
+python app.py
+```
+
+سپس نشانی‌ای را که برنامه چاپ می‌کند در مرورگر باز کنید. برای ساخت فایل‌ها و اجرای تست‌ها، دستورهای بخش‌های انگلیسی بالا را ببینید.
+
+### امکانات
+
+- ۸ درس، ۷ تمرین، ۷ راه‌حل، ۳ پروژه و آزمون ۱۳ سؤالی
+- ویرایشگر کد، اجرای پایتون و بررسی جداگانه‌ی تست‌ها
+- تشخیص خطا و راهنمای تمرین به فارسی و انگلیسی
+- محتوای کامل درس‌ها، تمرین‌ها، پروژه‌ها و آزمون به فارسی و انگلیسی
+- ذخیره‌ی پیشرفت و کد تمرین‌ها
+- چیدمان واکنش‌گرا برای رایانه، تبلت و گوشی
+- نسخه‌ی HTML آنلاین و آفلاین
+
+---
+
+## License
+
+See [LICENSE](LICENSE).

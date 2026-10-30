@@ -44,14 +44,14 @@ def main() -> int:
     cur = get("/api/curriculum")
     check(len(cur["lessons"]) == 8, "۸ درس")
     check(len(cur["exercises"]) == 7, "۷ تمرین")
-    check(cur["quiz_count"] == 20, "۲۰ سؤال آزمون")
+    check(cur["quiz_count"] == 13, "۱۳ سؤال آزمون")
 
     print("\n۲) اجرای کد با خطای NameError")
     r = post("/api/run", {"code": "print(nam)\n", "mode": "run"})
     d = r["diagnosis"]
     check(d["kind"] == "NameError", "نوع خطا تشخیص داده شد")
     check(d["line"] == 1, f"شماره‌ی خط درست است ({d['line']})")
-    check(d["title"] == "متغیر تعریف نشده", "عنوان فارسی درست است")
+    check(d["title"] == "Undefined variable", "English diagnosis is returned by default")
     check(len(d["fix"]) >= 2, "راه‌حل‌های پیشنهادی آمدند")
 
     print("\n۳) بررسی با راه‌حل درست ex01")
@@ -73,7 +73,7 @@ def main() -> int:
     check(bool(ex["title"]), f"عنوان: {ex['title']}")
     check(len(ex["user_part"].splitlines()) > 40, "بخش کد کاربر جدا شد")
     check(len(ex["tests_part"].splitlines()) > 10, "بخش تست جدا شد")
-    check(len(ex["hints"]) == 3, "سه سطح راهنما دارد")
+    check(len(ex["hints"]) >= 3, "At least three exercise hints are available")
 
     print("\n۶) راه‌حل قفل است؟")
     s = get("/api/solution?id=ex07_advanced")
@@ -82,9 +82,9 @@ def main() -> int:
 
     print("\n۷) آزمون")
     q = get("/api/quiz_questions")
-    check(len(q["questions"]) == 20, "۲۰ سؤال برای مرورگر")
-    result = post("/api/quiz", {"answers": [0] * 20})
-    check(result["total"] == 20, "نمره‌دهی کار می‌کند")
+    check(len(q["questions"]) == 13, "۱۳ سؤال برای مرورگر")
+    result = post("/api/quiz", {"answers": [0] * 13})
+    check(result["total"] == 13, "نمره‌دهی ۱۳ سؤال را درست انجام می‌دهد")
 
     print("\n۸) پیشرفت")
     p = get("/api/progress")

@@ -165,7 +165,7 @@ def main() -> int:
         print("\n۱۰) آزمون سریع")
         page.click("#navQuiz")
         page.wait_for_selector(".quiz__q", timeout=10000)
-        check(page.locator(".quiz__q").count() == 20, "۲۰ سؤال آزمون نمایش داده شد")
+        check(page.locator(".quiz__q").count() == 13, "۱۳ سؤال آزمون نمایش داده شد")
         page.locator(".quiz__q").first.locator(".quiz__opt").first.click()
         page.screenshot(path=str(SHOTS / "08-quiz.png"))
 

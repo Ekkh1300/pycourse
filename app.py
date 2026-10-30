@@ -57,22 +57,23 @@ MIN_ATTEMPTS_FOR_SOLUTION = 3
 
 
 def _lang(query: dict | None = None) -> str:
-    """Return the current UI language ('fa' or 'en')."""
+    """Return a validated request language without changing global preference."""
     if query and query.get("lang"):
         lang = query["lang"][0]
         if lang in ("fa", "en"):
-            paths.set_language(lang)
+            return lang
     return paths.get_language()
 
 
-def _diagnose(stderr: str) -> object | None:
+def _diagnose(stderr: str, lang: str | None = None) -> object | None:
     """Diagnose in the current UI language."""
-    return errors_fa.diagnose(stderr, lang=paths.get_language())
+    return errors_fa.diagnose(stderr, lang=lang or paths.get_language())
 
 
-def _hints(exercise_id: str) -> list[str]:
+def _hints(exercise_id: str, lang: str | None = None) -> list[str]:
     """Return the hint pool for an exercise in the current UI language."""
-    if paths.get_language() == "en":
+    lang = lang or paths.get_language()
+    if lang == "en":
         return hints_en.HINTS.get(exercise_id, hints_en.GENERAL_HINTS)
     return hints_mod.HINTS.get(exercise_id, hints_mod.GENERAL_HINTS)
 
@@ -218,7 +219,7 @@ def api_network(_query: dict) -> dict:
 
 
 def api_set_language(body: dict) -> dict:
-    """Set the UI language for this server session."""
+    """Set and persist the UI language."""
     lang = (body.get("lang") or "").strip()
     if lang not in ("fa", "en"):
         return {"lang": paths.get_language(), "error": "Invalid language"}
@@ -227,11 +228,12 @@ def api_set_language(body: dict) -> dict:
     return {"lang": lang, "ok": True}
 
 
-def api_curriculum(_query: dict) -> dict:
+def api_curriculum(query: dict) -> dict:
+    lang = _lang(query)
     return {
-        "lessons": content.list_lessons(),
-        "exercises": content.list_exercises(),
-        "projects": content.list_projects(),
+        "lessons": content.list_lessons(lang),
+        "exercises": content.list_exercises(lang),
+        "projects": content.list_projects(lang),
         "quiz_count": len(QUESTIONS),
         "python_version": sys.version.split()[0],
     }
@@ -239,20 +241,20 @@ def api_curriculum(_query: dict) -> dict:
 
 def api_doc(query: dict) -> dict:
     doc_id = (query.get("id") or [""])[0]
-    doc = content.read_any(doc_id)
+    lang = _lang(query)
+    doc = content.read_any(doc_id, lang)
     if doc is None:
-        lang = _lang(query)
         return {"error": "Document not found" if lang == "en" else "سند پیدا نشد"}
     return doc
 
 
 def api_exercise(query: dict) -> dict:
     exercise_id = (query.get("id") or [""])[0]
-    exercise = content.read_exercise(exercise_id)
+    lang = _lang(query)
+    exercise = content.read_exercise(exercise_id, lang)
     if exercise is None:
-        lang = _lang(query)
         return {"error": "Exercise not found" if lang == "en" else "تمرین پیدا نشد"}
-    exercise["hints"] = _hints(exercise_id)
+    exercise["hints"] = _hints(exercise_id, lang)
     exercise["attempts"] = int(progress.get_state().get("attempts", {}).get(exercise_id, 0))
     return exercise
 
@@ -261,7 +263,7 @@ def api_hint(query: dict) -> dict:
     exercise_id = (query.get("exercise") or [""])[0]
     level = int((query.get("level") or ["1"])[0])
     lang = _lang(query)
-    pool = _hints(exercise_id)
+    pool = _hints(exercise_id, lang)
     level = max(1, min(level, len(pool)))
     return {
         "level": level,
@@ -360,13 +362,14 @@ def api_quiz_questions(_query: dict) -> dict:
 
 
 def api_run(body: dict) -> dict:
-    """کد کاربر را اجرا می‌کند و نتیجه + تشخیص فارسی برمی‌گرداند."""
+    """Run user code and return output plus a localized diagnosis."""
     code = body.get("code") or ""
     mode = body.get("mode") or "run"
     exercise_id = body.get("exercise_id") or ""
+    lang = body.get("lang") if body.get("lang") in ("en", "fa") else paths.get_language()
 
     if mode == "check":
-        original = content.read_exercise(exercise_id)
+        original = content.read_exercise(exercise_id, lang)
         tests = original["tests_part"] if original else ""
         # هر تست جداگانه اجرا می‌شود تا دقیقاً بدانیم کدام‌ها پاس شده‌اند
         script = tester.build_check_script(code, tests) if tests else None
@@ -393,7 +396,7 @@ def api_run(body: dict) -> dict:
 
     diagnosis = None
     if result["stderr"].strip():
-        diagnosis = _diagnose(result["stderr"])
+        diagnosis = _diagnose(result["stderr"], lang)
         # اگر خطا از تست‌های خودمان آمده، پیام فارسی تست را نشان بده
         if diagnosis and diagnosis.kind == "AssertionError":
             diagnosis = errors_fa.diagnose_assertion(
@@ -468,10 +471,14 @@ class Handler(BaseHTTPRequestHandler):
             self._send(404, b"not found", "text/plain; charset=utf-8")
             return
         html = path.read_text(encoding="utf-8")
+        saved_progress = progress.get_state()
+        saved_lang = saved_progress.get("lang")
+        if saved_lang not in ("fa", "en"):
+            saved_lang = paths.get_language()
         payload = {
-            "curriculum": api_curriculum({}),
-            "progress": progress.get_state(),
-            "lang": paths.get_language(),
+            "curriculum": api_curriculum({"lang": [saved_lang]}),
+            "progress": saved_progress,
+            "lang": saved_lang,
         }
         blob = json.dumps(payload, ensure_ascii=False)
         # کل عبارت «/*__BOOTSTRAP__*/ null» جایگزین می‌شود، نه فقط کامنت
@@ -545,7 +552,7 @@ class Handler(BaseHTTPRequestHandler):
                 self._send_json(api_quiz_questions(query))
                 return
             if path == "/api/health":
-                self._send_json({"ok": True, "python": sys.version.split()[0]})
+                self._send_json({"ok": True, "python": sys.version.split()[0], "lang": paths.get_language()})
                 return
 
             self._send(404, b"not found", "text/plain; charset=utf-8")
@@ -596,6 +603,9 @@ class Handler(BaseHTTPRequestHandler):
 
 def main() -> int:
     global PORT
+    saved_lang = progress.get_state().get("lang", "en")
+    if saved_lang in ("fa", "en"):
+        paths.set_language(saved_lang)
     PORT = _find_free_port(PORT)
 
     runner.cleanup_run_dir()

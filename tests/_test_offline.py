@@ -104,7 +104,7 @@ def main() -> int:
         print("\n۵) آزمون و جست‌وجو")
         page.click("#navQuiz")
         page.wait_for_selector(".quiz__q", timeout=15000)
-        check(page.locator(".quiz__q").count() == 20, "۲۰ سؤال آزمون")
+        check(page.locator(".quiz__q").count() == 13, "۱۳ سؤال آزمون")
         page.fill("#searchInput", "حلقه")
         page.keyboard.press("Enter")
         page.wait_for_timeout(2000)

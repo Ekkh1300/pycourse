@@ -48,20 +48,20 @@ OFFLINE_FILES = {
 # ─────────────────────────────────────────────────────────────
 
 
-def build_course_data() -> dict:
+def build_course_data(lang: str = "en") -> dict:
     sys.path.insert(0, str(ROOT))
     from pycourse import content
     from pycourse import hints as hints_mod
 
     lessons = []
-    for item in content.list_lessons():
-        doc = content.read_lesson(item["id"])
+    for item in content.list_lessons(lang):
+        doc = content.read_lesson(item["id"], lang)
         if doc:
             lessons.append({"id": doc["id"], "title": doc["title"], "body": doc["body"]})
 
     exercises = []
-    for item in content.list_exercises():
-        doc = content.read_exercise(item["id"])
+    for item in content.list_exercises(lang):
+        doc = content.read_exercise(item["id"], lang)
         if not doc:
             continue
         exercises.append(
@@ -77,8 +77,8 @@ def build_course_data() -> dict:
         )
 
     projects = []
-    for item in content.list_projects():
-        doc = content.read_project(item["id"])
+    for item in content.list_projects(lang):
+        doc = content.read_project(item["id"], lang)
         if doc:
             projects.append({"id": doc["id"], "title": doc["title"], "body": doc["body"]})
 
@@ -106,14 +106,17 @@ def build_course_data() -> dict:
     # (مثلاً first_steps که درس ۰ به آن وصل است). اینجا همان را از قبل
     # می‌شکافیم تا نسخه‌ی HTML هم دقیقاً همان پاسخ را بدهد.
     extra_exercises = {}
-    projects_py = ROOT / "projects"
+    projects_py = ROOT / "projects" / lang
+    if not projects_py.is_dir():
+        projects_py = ROOT / "projects"
     if projects_py.is_dir():
         for path in sorted(projects_py.glob("*.py")):
-            doc = content.read_exercise(path.stem)
+            doc = content.read_exercise(path.stem, lang)
             if doc:
                 extra_exercises[doc["id"]] = doc
 
     return {
+        "lang": lang,
         "lessons": lessons,
         "exercises": exercises,
         "projects": projects,
@@ -323,9 +326,11 @@ def assemble(course: dict, *, offline: bool) -> str:
 
 def main() -> int:
     DIST.mkdir(exist_ok=True)
-    course = build_course_data()
+    course_en = build_course_data("en")
+    course_fa = build_course_data("fa")
+    course = {"en": course_en, "fa": course_fa}
 
-    # ── نسخه‌ی آنلاین ──
+    # ── English-default online build with both languages bundled ──
     online = assemble(course, offline=False)
     out_online = DIST / "PythonTerminal.html"
     out_online.write_text(online, encoding="utf-8")

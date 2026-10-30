@@ -24,7 +24,7 @@
     paletteIndex: 0,
     paletteItems: [],
     lastResult: null,
-    lang: "fa",  /* current UI language: "fa" or "en" */
+    lang: "en",  /* current UI language: "en" or "fa" */
   };
 
   /* ── میان‌برها ── */
@@ -1025,15 +1025,14 @@
           state.lang = nextLang;
           document.documentElement.setAttribute("lang", nextLang);
           document.documentElement.setAttribute("dir", nextLang === "fa" ? "rtl" : "ltr");
-          // Refresh UI to reflect language change
-          renderSidebar();
-          renderDocSelect();
-          if (state.docId) {
-            if (state.docKind === "lesson") openLesson(state.docId);
-            else if (state.docKind === "exercise") loadExercise(state.docId, false);
-            else if (state.docKind === "project") openProject(state.docId);
-          }
-          toast(nextLang === "en" ? "Language switched to English" : "زبان به فارسی تغییر کرد");
+          var prev = state.docId, prevKind = state.docKind;
+          api("/api/curriculum?lang=" + nextLang).then(function (curriculum) {
+            if (curriculum.error) throw new Error(curriculum.error);
+            state.curriculum = curriculum;
+            renderSidebar(); renderDocSelect();
+            if (prev) { if (prevKind === "lesson") openLesson(prev); else if (prevKind === "exercise") loadExercise(prev, false); else if (prevKind === "project") openProject(prev); else if (prevKind === "quiz") openQuiz(); }
+            toast(getText ? (nextLang === "en" ? "langSwitchEn" : "langSwitchFa") : (nextLang === "en" ? "Language switched to English" : "زبان به فارسی تغییر کرد"));
+          }).catch(function (e) { toast("Language switch failed: " + e.message, "error"); });
         }
       })
       .catch(function (err) {

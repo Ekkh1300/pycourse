@@ -6,7 +6,7 @@
 خروجی در پوشه‌ی release\ :
   • PythonTerminal.exe        — برنامه‌ی کامل برای ویندوز
   • PythonTerminal.html       — نسخه‌ی وب تک‌فایلی
-  • راهنمای فارسی            — چطور اجرا و منتشر کنم
+  • README.txt                — setup and usage guide
 """
 
 from __future__ import annotations
@@ -28,102 +28,62 @@ ROOT = Path(__file__).resolve().parent
 DIST = ROOT / "dist"
 RELEASE = ROOT / "release"
 
-README = """# ترمینال پایتون — محیط آموزش مقدماتی
+README = """# Python Terminal — Beginner Python Course
 
-## ۱) نسخه‌ی ویندوز (پیشنهادی)
+Python Terminal is a browser-based learning app with lessons, exercises, a code editor, and Python execution.
+The interface defaults to English. Use the 🌐 Fa ⇄ En button to switch to Persian (RTL).
+Error diagnosis, hints, lessons, exercises, projects, and quiz content are available in both English and Persian. Switch the language at any time — your choice is remembered.
 
-فایل `PythonTerminal.exe` را دابل‌کلیک کن. مرورگر خودکار باز می‌شود.
-هیچ نصبی لازم نیست — پایتون داخل خودِ فایل exe هست.
+## Windows app
 
-- اگر پورت ۸۷۶۵ اشغال بود، خودکار پورت بعدی را می‌گیرد.
-- برای بستن برنامه، پنجره‌ی ترمینال را ببند. (اگر بسته نشد، در Task
-  Manager پروسه‌ی `PythonTerminal` را ببند.)
-- پیشرفت و کدهایت در پوشه‌ی کنار exe ذخیره می‌شود (`.progress.json`).
+Double-click `PythonTerminal.exe`; your browser opens automatically. No separate Python installation is required.
 
-## ۲) نسخه‌ی وب
+- If port 8765 is busy, the app selects another port.
+- Progress and saved code are stored beside the executable in `.progress.json`.
+- To close the app, close its console window, or end `PythonTerminal` in Task Manager.
 
-دو نسخه هست:
+## Web builds
 
-### `PythonTerminal.html` — کوچک و آنلاین (۳۰۰ کیلوبایت)
+### `PythonTerminal.html` — lightweight online build
 
-- **باز کردن محلی:** روی فایل دابل‌کلیک کن.
-- **انتشار:** فایل را روی هر هاست استاتیک بگذار:
-  GitHub Pages / Netlify / Cloudflare Pages / Vercel / هر سرور وب.
-- برای «اجرای کد پایتون» اینترنت لازم است (Pyodide از CDN بارگذاری
-  می‌شود — حدود ۱۰ مگابایت، فقط بارِ اول). بقیه‌ی برنامه (جزوه،
-  تمرین، آزمون، تشخیص خطای فارسی) کاملاً آفلاین کار می‌کند.
+Open the file or host it on GitHub Pages, Netlify, Cloudflare Pages, Vercel, or another static host. Running Python requires internet access to load Pyodide from a CDN (about 10 MB on first use).
 
-### `PythonTerminal-offline.html` — کاملاً آفلاین (۱۷ مگابایت)
+### `PythonTerminal-offline.html` — fully offline build
 
-- کل موتور پایتون (Pyodide) داخل خودِ فایل است.
-- **هیچ اینترنتی لازم نیست** — حتی با قطع کامل شبکه.
-- روی فلش، روی CD، یا با ایمیل کردنش هرجا کار می‌کند.
-- دابل‌کلیک کن و باز شود. حتی از روی `file://` کار می‌کند.
+Pyodide is bundled in the HTML file. Open it in a browser, including from `file://`; no internet connection is required.
 
-## ۳) باز کردن روی گوشی
+## Use on a phone or tablet
 
-رابط کامل ریسپانسیو است و روی آیفون/اندروید/تبلت تست شده:
-ناوبری پایین صفحه (فهرست / کد / جزوه)، کشوی کناری، هدف‌های لمسی ≥۴۴ پیکسل.
+- **Same Wi-Fi:** run `PythonTerminal.exe` or `python app.py` on your computer and open the displayed network URL on your mobile device.
+- **Transfer a file:** send `PythonTerminal-offline.html` to your device and open it in a browser. On iPhone, use Files → Share → Open in Safari.
+- **Host online:** upload `PythonTerminal.html` to a static hosting provider.
 
-### راه «الف» — سرور محلی (بدون هیچ انتقال فایلی)
-
-۱. `PythonTerminal.exe` را روی کامپیوتر اجرا کن (یا `python app.py`).
-۲. در پنجره‌ی مشکی، آدرس گوشی را ببین:  `http://192.168.x.x:8765/`
-   یا داخل برنامه، دکمه‌ی «📱 گوشی» در نوار بالا را بزن.
-۳. گوشی باید روی **همان وای‌فای** کامپیوتر باشد.
-۴. همان آدرس را در مرورگر گوشی تایپ کن.
-
-نکته: اگر باز نشد، فایروال ویندوز را بررسی کن (پاپ‌آپ اولین اجرا را
-«اجازه» بزن) و مطمئن شو گوشی روی داده‌ی موبایل نیست.
-
-### راه «ب» — انتقال خودِ فایل
-
-**اندروید** (ساده‌ترین حالت):
-- `PythonTerminal.html` را با WhatsApp/Telegram/ایمیل به خودت بفرست،
-  ذخیره کن، بعد در Chrome باز کن.
-- یا با کابل USB در پوشه‌ی `Download` کپی کن و باز کن.
-
-**آیفون**:
-- فایل را در اپلیکیشن «Files» ذخیره کن.
-- روی فایل ضربه بزن → Share → **Open in Safari**.
-
-### راه «ج» — انتشار آنلاین (برای هر دو گوشی، بهترین راه)
-
-فایل `PythonTerminal.html` را در **Netlify Drop** (app.netlify.com/drop)
-بکش و رها کن. بعد از ۳۰ ثانیه یک آدرس مثل
-`https://چیزی-صادفانه.netlify.app` می‌گیری که در هر مرورگری باز می‌شود.
-برای انتشار دائمی‌تر، GitHub Pages هم همین‌طور کار می‌کند.
-
-### راه «د» — فلش/بلوتوث
-
-`PythonTerminal.zip` (۱۶ مگابایت) را به گوشی بفرست، استخراج کن و
-`PythonTerminal-offline.html` داخلش را باز کن. این نسخه هیچ اینترنتی
-نمی‌خواهد.
-
-> نسخه‌ی آنلاین برای «اجرای کد پایتون» به اینترنت نیاز دارد (بار اول حدود
-> ۱۰ مگابایت). بقیه‌ی برنامه آفلاین است.
-
-## ۴) اگر خواستی خودت توسعه بدهی
+## Build from source
 
 ```powershell
-python app.py                 # اجرای نسخه‌ی محلی با سرور
-python build_exe.py            # ساخت exe
-python build_html.py           # ساخت html
-python build_html.py --download   # (فقط یک‌بار) دانلود Pyodide برای نسخه‌ی آفلاین
-python build_release.py        # ساخت همه + بسته‌ی نهایی
+python app.py
+python build_exe.py
+python build_html.py
+python build_html.py --download  # one-time Pyodide download for offline build
+python build_release.py
 ```
 
-تست‌ها:
+Requires Python 3.10 or newer. The app server uses only the Python standard library. UI tests require Playwright.
+
+## Tests
 
 ```powershell
-python tests\\_test_diag.py       # تشخیص خطاها
-python tests\\_test_solutions.py  # راه‌حل‌ها
-python tests\\_test_api.py        # APIها (سرور باید بالا باشد)
-python tests\\_test_ui.py         # رابط کاربری
-python tests\\_test_static.py     # نسخه‌ی HTML آنلاین
-python tests\\_test_offline.py    # نسخه‌ی HTML آفلاین (اینترنت قطع می‌شود)
-python tests\\_test_mobile.py     # موبایل: سرور + هر دو فایل HTML
+python tests\\_test_diag.py
+python tests\\_test_solutions.py
+python tests\\_test_api.py
+python tests\\_test_ui.py
+python tests\\_test_static.py
+python tests\\_test_offline.py
+python tests\\_test_mobile.py
+python tests\\_test_recovery.py
 ```
+
+For the complete documentation, visit https://github.com/Ekkh1300/pycourse.
 """
 
 

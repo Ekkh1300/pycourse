@@ -23,6 +23,7 @@ DEFAULT_STATE = {
     "font_size": 15,
     "theme": "amber",
     "notes": {},  # {"ex01_basics": "یادداشت من"}
+    "lang": "en",  # Default language: "fa" (Persian) or "en" (English)
 }
 
 
